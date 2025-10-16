@@ -1,6 +1,9 @@
 /* Import Circular Std font from CDN */
+@import url('https://cdn.jsdelivr.net/npm/@maptiler/sdk@latest/dist/maptiler-sdk.css');
 @import url('https://cdn.jsdelivr.net/npm/@vetixy/circular-std@1.0.0/dist/index.min.css');
 @import "tailwindcss";
+
+/* MapTiler SDK styles */
 
 :root {
   --background: #ffffff;
@@ -24,7 +27,7 @@
   --color-gray-400: var(--gray-400);
   --color-gray-600: var(--gray-600);
   --color-gray-900: var(--gray-900);
-  --font-sans: 'CircularStd', system-ui, -apple-system, sans-serif;
+  --font-sans: 'CircularStd';
 }
 
 @media (prefers-color-scheme: dark) {
@@ -47,7 +50,7 @@ html, body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'CircularStd', system-ui, -apple-system, sans-serif;
+  font-family: 'CircularStd';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
@@ -69,4 +72,22 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gray-400);
+}
+
+/* Hide MapTiler attribution/watermark */
+.maplibregl-ctrl-attrib,
+.maptiler-attribution,
+.mapboxgl-ctrl-attrib,
+.maplibregl-ctrl-bottom-right,
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-attrib-inner {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Hide any attribution links */
+.maplibregl-ctrl a,
+.mapboxgl-ctrl a {
+  display: none !important;
 }

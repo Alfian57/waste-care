@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '../components';
+import { Button, BottomNavigation } from '../components';
 
 export default function LaporGPSPage() {
   const [loading, setLoading] = useState(false);
@@ -19,12 +19,19 @@ export default function LaporGPSPage() {
     // TODO: Open location picker/map
   };
 
+  const handleBack = () => {
+    window.location.href = '/dashboard';
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
-          <button className="p-2 -ml-2">
+          <button 
+            className="p-2 -ml-2"
+            onClick={handleBack}
+          >
             <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -106,6 +113,7 @@ export default function LaporGPSPage() {
           Konfirmasi
         </Button>
       </div>
+      <BottomNavigation />
     </div>
   );
 }

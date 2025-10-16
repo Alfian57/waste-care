@@ -3,3 +3,5 @@ export { default as Input } from './Input';
 export { default as Checkbox } from './Checkbox';
 export { default as GoogleButton } from './GoogleButton';
 export { default as PWAInstallPrompt } from './PWAInstallPrompt';
+export { default as BottomNavigation } from './BottomNavigation';
+export { default as MapTilerMap } from './MapTilerMap';

@@ -19,7 +19,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses = `
-    font-medium rounded-xl transition-all duration-200 
+    font-light rounded-xl transition-all duration-200 
     focus:outline-none focus:ring-2 focus:ring-offset-2 
     disabled:opacity-50 disabled:cursor-not-allowed
     flex items-center justify-center gap-2
@@ -28,9 +28,9 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantClasses = {
     primary: `
-      bg-[#16a34a] hover:bg-[#15803d] 
+      bg-emerald-700 hover:bg-emerald-800
       text-white 
-      focus:ring-green-500
+      focus:ring-emerald-500 
       shadow-sm
     `,
     secondary: `
@@ -47,9 +47,9 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'px-3 py-2 text-sm min-h-[36px]',
-    md: 'px-4 py-3 text-base min-h-[48px]',
-    lg: 'px-6 py-4 text-lg min-h-[56px]'
+    sm: 'px-3 py-2.5 text-sm min-h-[40px]',
+    md: 'px-4 py-3.5 text-base min-h-[52px]',
+    lg: 'px-6 py-4.5 text-lg min-h-[60px]'
   };
 
   const widthClass = fullWidth ? 'w-full' : '';
