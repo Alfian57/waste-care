@@ -1,15 +1,30 @@
+/* Import Circular Std font from CDN */
+@import url('https://cdn.jsdelivr.net/npm/@vetixy/circular-std@1.0.0/dist/index.min.css');
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #16a34a;
+  --primary-hover: #15803d;
+  --border: #e5e7eb;
+  --gray-50: #f9fafb;
+  --gray-400: #9ca3af;
+  --gray-600: #4b5563;
+  --gray-900: #111827;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-border: var(--border);
+  --color-gray-50: var(--gray-50);
+  --color-gray-400: var(--gray-400);
+  --color-gray-600: var(--gray-600);
+  --color-gray-900: var(--gray-900);
+  --font-sans: 'CircularStd', system-ui, -apple-system, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +34,39 @@
   }
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'CircularStd', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
 }
