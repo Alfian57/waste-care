@@ -1,19 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Button, DetailItem } from '../../components';
+import { useReport } from '@/contexts/ReportContext';
 
 export default function KonfirmasiDataPage() {
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { reportData, resetReport } = useReport();
 
-  const handleSubmitReport = () => {
-    setLoading(true);
-    // Simulate final submission
-    setTimeout(() => {
-      // Navigate to success page or dashboard
-      alert('Laporan berhasil dikirim!');
-      window.location.href = '/dashboard';
-    }, 2000);
+  const handleDone = () => {
+    // Reset report data
+    resetReport();
+    // Navigate to dashboard using Next.js router
+    router.push('/dashboard');
+  };
+
+  const wasteTypeLabels = {
+    organik: 'Organik',
+    anorganik: 'Anorganik',
+    berbahaya: 'Berbahaya',
+    campuran: 'Campuran',
+  };
+
+  const wasteVolumeLabels = {
+    kurang_dari_1kg: 'Kurang dari 1kg',
+    '1_5kg': '1-5kg',
+    '6_10kg': '6-10kg',
+    lebih_dari_10kg: 'Lebih dari 10kg',
+  };
+
+  const locationCategoryLabels = {
+    sungai: 'Di sungai',
+    pinggir_jalan: 'Pinggir jalan',
+    area_publik: 'Area publik',
+    tanah_kosong: 'Tanah kosong',
+    lainnya: 'Lainnya',
   };
 
   const handleBack = () => {
@@ -54,21 +76,46 @@ export default function KonfirmasiDataPage() {
       {/* Content */}
       <div className="flex-1 px-6 py-8">
         <div className="space-y-6">
-          <h1 className="text-2xl font-bold text-gray-900 font-['CircularStd'] text-center">
-            Konfirmasi data
-          </h1>
+          <div className="text-center space-y-3">
+            <div className="flex justify-center">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+            
+            <h1 className="text-2xl font-bold text-gray-900 font-['CircularStd']">
+              Laporan berhasil dikirim!
+            </h1>
+            <p className="text-gray-600 font-['CircularStd']">
+              Terima kasih telah berkontribusi menjaga lingkungan
+            </p>
+          </div>
 
           {/* Photos Preview */}
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-700 font-['CircularStd']">4 Foto diunggah</span>
+              <span className="text-sm font-medium text-gray-700 font-['CircularStd']">
+                {reportData.photos.length} Foto diunggah
+              </span>
               <div className="flex -space-x-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-green-400 rounded-lg border-2 border-white"></div>
-                <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-400 rounded-lg border-2 border-white"></div>
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg border-2 border-white"></div>
-                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-lg border-2 border-white flex items-center justify-center">
-                  <span className="text-xs font-medium text-white">+1</span>
-                </div>
+                {reportData.photos.slice(0, 3).map((photo, index) => (
+                  <div 
+                    key={index}
+                    className="w-10 h-10 rounded-lg border-2 border-white overflow-hidden"
+                    style={{ 
+                      backgroundImage: `url(data:image/jpeg;base64,${photo})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  ></div>
+                ))}
+                {reportData.photos.length > 3 && (
+                  <div className="w-10 h-10 bg-gray-300 rounded-lg border-2 border-white flex items-center justify-center">
+                    <span className="text-xs font-medium text-gray-700">+{reportData.photos.length - 3}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -83,7 +130,7 @@ export default function KonfirmasiDataPage() {
                 </svg>
               }
               title="Jenis sampah"
-              description="Campuran"
+              description={reportData.wasteType ? wasteTypeLabels[reportData.wasteType] : '-'}
             />
 
             {/* Waste Amount */}
@@ -93,8 +140,8 @@ export default function KonfirmasiDataPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                 </svg>
               }
-              title="Muatan sampah"
-              description="Lebih dari 10kg"
+              title="Volume sampah"
+              description={reportData.wasteVolume ? wasteVolumeLabels[reportData.wasteVolume] : '-'}
             />
 
             {/* Location */}
@@ -106,8 +153,20 @@ export default function KonfirmasiDataPage() {
                 </svg>
               }
               title="Kategori lokasi"
-              description="Di tengah sungai"
+              description={reportData.locationCategory ? locationCategoryLabels[reportData.locationCategory] : '-'}
             />
+
+            {/* Notes if exists */}
+            {reportData.notes && (
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h3 className="text-sm font-medium text-gray-700 font-['CircularStd'] mb-2">
+                  Catatan tambahan
+                </h3>
+                <p className="text-sm text-gray-600 font-['CircularStd']">
+                  {reportData.notes}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -115,12 +174,11 @@ export default function KonfirmasiDataPage() {
       {/* Bottom Button */}
       <div className="p-6">
         <Button
-          onClick={handleSubmitReport}
-          loading={loading}
+          onClick={handleDone}
           fullWidth
           className="bg-[#16a34a] hover:bg-[#15803d]"
         >
-          Kirim laporan
+          Selesai
         </Button>
       </div>
     </div>

@@ -1,22 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button, DetailItem } from '../../components';
 
 export default function LaporFotoPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleAddPhoto = () => {
     console.log('Add photo clicked');
-    // TODO: Open camera or photo picker
-    // For now, navigate to confirmation
+    // Navigate to confirmation using Next.js router
     setTimeout(() => {
-      window.location.href = '/lapor/konfirmasi-foto';
+      router.push('/lapor/konfirmasi-foto');
     }, 500);
   };
 
   const handleBack = () => {
-    window.history.back();
+    router.back();
   };
 
   return (

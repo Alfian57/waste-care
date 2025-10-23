@@ -1,26 +1,86 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button, BottomNavigation, DetailItem } from '../components';
+import { useReport } from '@/contexts/ReportContext';
 
 export default function LaporGPSPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const { setLocation, reportData } = useReport();
+
+  useEffect(() => {
+    // Check if location is already captured
+    if (reportData.location) {
+      setLocationEnabled(true);
+    }
+  }, [reportData.location]);
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Browser Anda tidak mendukung geolocation');
+      return;
+    }
+
+    setLoading(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log('Location captured:', { latitude, longitude });
+        setLocation({ latitude, longitude });
+        setLocationEnabled(true);
+        setLoading(false);
+      },
+      (error) => {
+        setLoading(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError('Izin lokasi ditolak. Mohon izinkan akses lokasi di pengaturan browser.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError('Informasi lokasi tidak tersedia');
+            break;
+          case error.TIMEOUT:
+            setLocationError('Permintaan lokasi timeout');
+            break;
+          default:
+            setLocationError('Terjadi kesalahan saat mendapatkan lokasi');
+            break;
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   const handleConfirm = () => {
+    if (!locationEnabled) {
+      alert('Mohon izinkan akses lokasi terlebih dahulu');
+      return;
+    }
+
+    console.log('Confirming with location:', reportData.location);
     setLoading(true);
-    // Navigate to photo page
+    // Navigate to detail page using Next.js router
     setTimeout(() => {
-      window.location.href = '/lapor/foto';
-    }, 1000);
+      router.push('/lapor/detail');
+    }, 500);
   };
 
   const handleLocationEdit = () => {
-    console.log('Edit location clicked');
-    // TODO: Open location picker/map
+    handleGetLocation();
   };
 
   const handleBack = () => {
-    window.location.href = '/dashboard';
+    router.push('/dashboard');
   };
 
   return (
@@ -82,11 +142,17 @@ export default function LaporGPSPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               }
-              iconBgColor="bg-gray-100"
-              iconColor="text-gray-500"
-              title="Lokasi mati"
-              description="Izinkan untuk membagikan lokasi untuk melanjutkan"
-              actionText="Izinkan"
+              iconBgColor={locationEnabled ? "bg-green-100" : "bg-gray-100"}
+              iconColor={locationEnabled ? "text-green-500" : "text-gray-500"}
+              title={locationEnabled ? "Lokasi aktif" : "Lokasi mati"}
+              description={
+                locationError 
+                  ? locationError
+                  : locationEnabled 
+                    ? `Lat: ${reportData.location?.latitude.toFixed(6)}, Lon: ${reportData.location?.longitude.toFixed(6)}`
+                    : "Izinkan untuk membagikan lokasi untuk melanjutkan"
+              }
+              actionText={locationEnabled ? "Perbarui" : "Izinkan"}
               onActionClick={handleLocationEdit}
             />
           </div>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ReportProvider } from "@/contexts/ReportContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -80,7 +81,9 @@ export default function RootLayout({
       <body className="antialiased" suppressHydrationWarning>
         <AuthProvider>
           <ProtectedRoute>
-            {children}
+            <ReportProvider>
+              {children}
+            </ReportProvider>
           </ProtectedRoute>
         </AuthProvider>
       </body>
