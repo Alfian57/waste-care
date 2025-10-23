@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BottomNavigation, Button } from '../components';
 import { logout } from '@/lib/auth';
@@ -10,13 +10,6 @@ export default function AkunPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [user, loading, router]);
 
   const handleLogout = async () => {
     if (loggingOut) return;
@@ -33,8 +26,7 @@ export default function AkunPage() {
         return;
       }
 
-      // Redirect to login page
-      router.push('/login');
+      // Redirect handled by AuthProvider
     } catch (error) {
       console.error('Logout error:', error);
       alert('Gagal logout. Silakan coba lagi.');
@@ -68,20 +60,8 @@ export default function AkunPage() {
     return 'User';
   };
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#16a34a] mx-auto"></div>
-          <p className="mt-4 text-gray-600 font-['CircularStd']">Memuat...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render if no user
-  if (!user) {
+  // Show loading state (handled by ProtectedRoute, but keep for consistency)
+  if (loading || !user) {
     return null;
   }
 
