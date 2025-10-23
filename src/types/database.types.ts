@@ -39,7 +39,7 @@ export interface Database {
           waste_volume: string
           location_category: string
           notes: string | null
-          latitude: string
+          lattitude: string
           longitude: string
         }
         Insert: {
