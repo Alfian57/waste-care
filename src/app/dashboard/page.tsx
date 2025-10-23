@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { BottomNavigation, MapTilerMap, Button, BottomSheet } from '../components';
+import { useReports } from '@/hooks/useReports';
 import Image from 'next/image';
 
 export default function DashboardPage() {
@@ -9,39 +10,8 @@ export default function DashboardPage() {
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
-  // Sample waste markers data - memoized to prevent re-creation on every render
-  const wasteMarkers = useMemo(() => [
-    {
-      id: '1',
-      coordinates: [110.3695, -7.7956] as [number, number],
-      type: 'waste' as const,
-      title: 'Tumpukan sampah',
-      location: 'Kost Ndalem A',
-      wasteType: 'Campuran',
-      amount: 'Lebih dari 10kg',
-      category: 'Di tengah sungai'
-    },
-    {
-      id: '2',
-      coordinates: [110.3795, -7.7856] as [number, number],
-      type: 'waste' as const,
-      title: 'Sampah plastik',
-      location: 'Jalan Malioboro',
-      wasteType: 'Plastik',
-      amount: '5-10kg',
-      category: 'Pinggir jalan'
-    },
-    {
-      id: '3',
-      coordinates: [110.3595, -7.8056] as [number, number],
-      type: 'waste' as const,
-      title: 'Sampah organik',
-      location: 'Pasar Beringharjo',
-      wasteType: 'Organik',
-      amount: '1-5kg',
-      category: 'Area pasar'
-    }
-  ], []);
+  // Fetch waste markers from Supabase
+  const { reports: wasteMarkers, loading, error } = useReports();
 
   const handleSearch = useCallback(() => {
     console.log('Searching for:', searchQuery);
@@ -58,6 +28,34 @@ export default function DashboardPage() {
   }, []);
 
   const selectedMarker = selectedMarkerId ? wasteMarkers.find(m => m.id === selectedMarkerId) : null;
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-transparent pb-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Memuat data laporan...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-transparent pb-20 flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="text-red-500 text-5xl mb-4">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Gagal Memuat Data</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Coba Lagi
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-transparent pb-20">
@@ -108,7 +106,7 @@ export default function DashboardPage() {
         onSearchClick={handleSearch}
         title={selectedMarker?.title || ''}
         description="Detail laporan sampah pada titik ini"
-        images={['/images/template-image.png', '/images/template-image.png']}
+        images={selectedMarker?.images || []}
         wasteType={selectedMarker?.wasteType || ''}
         amount={selectedMarker?.amount || ''}
         category={selectedMarker?.category || ''}
