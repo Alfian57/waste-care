@@ -2,9 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button, Input, Checkbox, GoogleButton, PWAInstallPrompt } from '../components';
+import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -45,22 +48,58 @@ export default function LoginPage() {
     if (!validateForm()) return;
 
     setLoading(true);
+    setErrors({});
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Login attempt:', formData);
-      // TODO: Implement actual login logic
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        // Handle specific error messages
+        if (error.message.includes('Invalid login credentials')) {
+          setErrors({ email: 'Email atau password salah' });
+        } else if (error.message.includes('Email not confirmed')) {
+          setErrors({ email: 'Email belum diverifikasi. Silakan cek email Anda.' });
+        } else {
+          setErrors({ email: error.message });
+        }
+        return;
+      }
+
+      if (data.user) {
+        // Successfully logged in
+        console.log('Login successful:', data.user);
+        
+        // Redirect to dashboard
+        router.push('/dashboard');
+      }
     } catch (error) {
       console.error('Login error:', error);
+      setErrors({ email: 'Terjadi kesalahan. Silakan coba lagi.' });
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-    console.log('Google login clicked');
-    // TODO: Implement Google OAuth
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+
+      if (error) {
+        console.error('Google login error:', error);
+        setErrors({ email: 'Gagal login dengan Google. Silakan coba lagi.' });
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      setErrors({ email: 'Terjadi kesalahan. Silakan coba lagi.' });
+    }
   };
 
   return (
