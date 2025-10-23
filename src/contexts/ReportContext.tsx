@@ -14,6 +14,15 @@ interface ReportData {
   wasteVolume: 'kurang_dari_1kg' | '1_5kg' | '6_10kg' | 'lebih_dari_10kg' | null;
   locationCategory: 'sungai' | 'pinggir_jalan' | 'area_publik' | 'tanah_kosong' | 'lainnya' | null;
   notes?: string;
+  // Store AI validation result after upload
+  aiValidation?: {
+    isWaste: boolean;
+    confidence: string;
+    reason?: string;
+    waste_type?: string;
+    waste_volume?: string;
+    location_category?: string;
+  };
 }
 
 interface ReportContextType {
@@ -25,6 +34,7 @@ interface ReportContextType {
   setWasteVolume: (volume: ReportData['wasteVolume']) => void;
   setLocationCategory: (category: ReportData['locationCategory']) => void;
   setNotes: (notes: string) => void;
+  setAiValidation: (validation: ReportData['aiValidation']) => void;
   resetReport: () => void;
 }
 
@@ -73,6 +83,10 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     setReportData(prev => ({ ...prev, notes }));
   };
 
+  const setAiValidation = (validation: ReportData['aiValidation']) => {
+    setReportData(prev => ({ ...prev, aiValidation: validation }));
+  };
+
   const resetReport = () => {
     setReportData(initialReportData);
   };
@@ -88,6 +102,7 @@ export function ReportProvider({ children }: { children: ReactNode }) {
         setWasteVolume,
         setLocationCategory,
         setNotes,
+        setAiValidation,
         resetReport,
       }}
     >

@@ -85,7 +85,6 @@ export default function KonfirmasiFotoPage() {
               <div className="flex-1 h-1 bg-orange-500 rounded"></div>
               <div className="flex-1 h-1 bg-orange-500 rounded"></div>
               <div className="flex-1 h-1 bg-gray-200 rounded"></div>
-              <div className="flex-1 h-1 bg-gray-200 rounded"></div>
             </div>
           </div>
           
@@ -94,7 +93,7 @@ export default function KonfirmasiFotoPage() {
         
         {/* Step Info */}
         <div className="mt-3">
-          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 3/5</p>
+          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 3/4</p>
         </div>
       </div>
 

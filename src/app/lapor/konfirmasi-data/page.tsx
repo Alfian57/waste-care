@@ -38,6 +38,11 @@ export default function KonfirmasiDataPage() {
     lainnya: 'Lainnya',
   };
 
+  // Get data from AI validation result
+  const wasteType = reportData.aiValidation?.waste_type || reportData.wasteType;
+  const wasteVolume = reportData.aiValidation?.waste_volume || reportData.wasteVolume;
+  const locationCategory = reportData.aiValidation?.location_category || reportData.locationCategory;
+
   const handleBack = () => {
     window.history.back();
   };
@@ -60,7 +65,6 @@ export default function KonfirmasiDataPage() {
               <div className="flex-1 h-1 bg-orange-500 rounded"></div>
               <div className="flex-1 h-1 bg-orange-500 rounded"></div>
               <div className="flex-1 h-1 bg-orange-500 rounded"></div>
-              <div className="flex-1 h-1 bg-orange-500 rounded"></div>
             </div>
           </div>
           
@@ -69,7 +73,7 @@ export default function KonfirmasiDataPage() {
         
         {/* Step Info */}
         <div className="mt-3">
-          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 5/5</p>
+          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 4/4</p>
         </div>
       </div>
 
@@ -89,7 +93,7 @@ export default function KonfirmasiDataPage() {
               Laporan berhasil dikirim!
             </h1>
             <p className="text-gray-600 font-['CircularStd']">
-              Terima kasih telah berkontribusi menjaga lingkungan
+              Terima kasih telah berkontribusi menjaga lingkungan. AI kami telah menganalisis foto dan mengklasifikasikan sampah secara otomatis.
             </p>
           </div>
 
@@ -129,8 +133,8 @@ export default function KonfirmasiDataPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               }
-              title="Jenis sampah"
-              description={reportData.wasteType ? wasteTypeLabels[reportData.wasteType] : '-'}
+              title="Jenis sampah (dianalisis AI)"
+              description={wasteType ? wasteTypeLabels[wasteType as keyof typeof wasteTypeLabels] : '-'}
             />
 
             {/* Waste Amount */}
@@ -140,8 +144,8 @@ export default function KonfirmasiDataPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                 </svg>
               }
-              title="Volume sampah"
-              description={reportData.wasteVolume ? wasteVolumeLabels[reportData.wasteVolume] : '-'}
+              title="Volume sampah (dianalisis AI)"
+              description={wasteVolume ? wasteVolumeLabels[wasteVolume as keyof typeof wasteVolumeLabels] : '-'}
             />
 
             {/* Location */}
@@ -152,8 +156,8 @@ export default function KonfirmasiDataPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               }
-              title="Kategori lokasi"
-              description={reportData.locationCategory ? locationCategoryLabels[reportData.locationCategory] : '-'}
+              title="Kategori lokasi (dianalisis AI)"
+              description={locationCategory ? locationCategoryLabels[locationCategory as keyof typeof locationCategoryLabels] : '-'}
             />
 
             {/* Notes if exists */}

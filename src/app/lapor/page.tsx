@@ -69,9 +69,9 @@ export default function LaporGPSPage() {
 
     console.log('Confirming with location:', reportData.location);
     setLoading(true);
-    // Navigate to detail page using Next.js router
+    // Navigate to foto page using Next.js router (skip detail page)
     setTimeout(() => {
-      router.push('/lapor/detail');
+      router.push('/lapor/foto');
     }, 500);
   };
 
@@ -104,7 +104,6 @@ export default function LaporGPSPage() {
               <div className="flex-1 h-1 bg-gray-200 rounded"></div>
               <div className="flex-1 h-1 bg-gray-200 rounded"></div>
               <div className="flex-1 h-1 bg-gray-200 rounded"></div>
-              <div className="flex-1 h-1 bg-gray-200 rounded"></div>
             </div>
           </div>
           
@@ -113,7 +112,7 @@ export default function LaporGPSPage() {
         
         {/* Step Info */}
         <div className="mt-3">
-          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 1/5</p>
+          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 1/4</p>
         </div>
       </div>
 

@@ -10,13 +10,12 @@ export default function MengunggahPage() {
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { reportData } = useReport();
+  const { reportData, setAiValidation } = useReport();
 
   const handleUpload = async () => {
     try {
-      // Validate data
-      if (!reportData.location || reportData.photos.length === 0 || 
-          !reportData.wasteType || !reportData.wasteVolume || !reportData.locationCategory) {
+      // Validate only required data (location and photos)
+      if (!reportData.location || reportData.photos.length === 0) {
         throw new Error('Data tidak lengkap');
       }
 
@@ -29,12 +28,9 @@ export default function MengunggahPage() {
         }
       }, 100);
 
-      // Upload first photo
+      // Upload first photo - let AI generate waste type, volume, and location category
       const result = await submitReport({
         imageBase64: reportData.photos[0],
-        wasteType: reportData.wasteType,
-        wasteVolume: reportData.wasteVolume,
-        locationCategory: reportData.locationCategory,
         latitude: reportData.location.latitude.toString(),
         longitude: reportData.location.longitude.toString(),
         notes: reportData.notes,
@@ -84,6 +80,11 @@ export default function MengunggahPage() {
         throw new Error(errorMsg);
       }
 
+      // Save AI validation result to context
+      if (result.data?.validation) {
+        setAiValidation(result.data.validation);
+      }
+
       // Simulate remaining progress (30-100%)
       const completeProgress = setInterval(() => {
         setProgress(prev => {
@@ -111,7 +112,7 @@ export default function MengunggahPage() {
     // Debug: Log all report data
     console.log('Report data in mengunggah page:', reportData);
     
-    // Validate all required data before starting upload
+    // Validate only required data before starting upload
     if (!reportData.location) {
       console.error('Missing location data');
       alert('Data lokasi tidak ditemukan. Mohon mulai dari awal.');
@@ -122,12 +123,6 @@ export default function MengunggahPage() {
       console.error('Missing photos');
       alert('Foto tidak ditemukan. Mohon tambahkan foto terlebih dahulu.');
       router.push('/lapor/konfirmasi-foto');
-      return;
-    }
-    if (!reportData.wasteType || !reportData.wasteVolume || !reportData.locationCategory) {
-      console.error('Missing report details');
-      alert('Data laporan tidak lengkap. Mohon lengkapi data terlebih dahulu.');
-      router.push('/lapor/detail');
       return;
     }
 
@@ -165,7 +160,6 @@ export default function MengunggahPage() {
               <div className="flex-1 h-1 bg-orange-500 rounded"></div>
               <div className="flex-1 h-1 bg-orange-500 rounded"></div>
               <div className="flex-1 h-1 bg-orange-500 rounded"></div>
-              <div className="flex-1 h-1 bg-gray-200 rounded"></div>
             </div>
           </div>
           
@@ -174,7 +168,7 @@ export default function MengunggahPage() {
         
         {/* Step Info */}
         <div className="mt-3">
-          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 4/5</p>
+          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 4/4</p>
         </div>
       </div>
 

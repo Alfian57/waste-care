@@ -38,7 +38,6 @@ export default function LaporFotoPage() {
               <div className="flex-1 h-1 bg-orange-500 rounded"></div>
               <div className="flex-1 h-1 bg-gray-200 rounded"></div>
               <div className="flex-1 h-1 bg-gray-200 rounded"></div>
-              <div className="flex-1 h-1 bg-gray-200 rounded"></div>
             </div>
           </div>
           
@@ -47,7 +46,7 @@ export default function LaporFotoPage() {
         
         {/* Step Info */}
         <div className="mt-3">
-          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 2/5</p>
+          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 2/4</p>
         </div>
       </div>
 
