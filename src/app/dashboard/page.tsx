@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { BottomNavigation, MapTilerMap, Button, BottomSheet } from '../components';
 import Image from 'next/image';
 
@@ -9,8 +9,8 @@ export default function DashboardPage() {
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
-  // Sample waste markers data
-  const wasteMarkers = [
+  // Sample waste markers data - memoized to prevent re-creation on every render
+  const wasteMarkers = useMemo(() => [
     {
       id: '1',
       coordinates: [110.3695, -7.7956] as [number, number],
@@ -41,31 +41,31 @@ export default function DashboardPage() {
       amount: '1-5kg',
       category: 'Area pasar'
     }
-  ];
+  ], []);
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     console.log('Searching for:', searchQuery);
-  };
+  }, [searchQuery]);
 
-  const handleMarkerClick = (markerId: string) => {
+  const handleMarkerClick = useCallback((markerId: string) => {
     setSelectedMarkerId(markerId);
     setShowDetails(true);
-  };
+  }, []);
 
-  const handleCloseDetails = () => {
+  const handleCloseDetails = useCallback(() => {
     setShowDetails(false);
     setSelectedMarkerId(null);
-  };
+  }, []);
 
   const selectedMarker = selectedMarkerId ? wasteMarkers.find(m => m.id === selectedMarkerId) : null;
 
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen bg-transparent pb-20">
       {/* Header Section */}
       <div className="relative">
         {/* Map Section */}
 
-        <div className={`relative h-[80vh]`}>
+        <div className="relative h-screen">
           <MapTilerMap
             className="w-full h-full"
             center={[110.3695, -7.7956]}

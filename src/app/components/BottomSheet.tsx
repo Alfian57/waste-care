@@ -58,7 +58,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     <>
       {/* Bottom Sheet */}
       <div 
-        className={`fixed inset-x-0 bg-white shadow-2xl transform transition-transform duration-300 ease-out ${
+        className={`fixed inset-x-0 bg-white shadow-2xl transition-all duration-500 ease-in-out ${
           showWelcome ? 'z-30' : 'z-50'
         }`}
         style={{
@@ -67,7 +67,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           border: '2px solid #cbd5e1',
           borderTopLeftRadius: '20px',
           borderTopRightRadius: '20px',
-          animation: 'slideUp 0.3s ease-out',
           overflow: 'hidden'
         }}
       >
@@ -168,14 +167,15 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               {/* Details */}
               <div className="p-4 space-y-3">
                 {/* Waste Type */}
-                {wasteType && (
-                  <DetailItem
-                    iconImage="/icons/trashicon.png"
-                    iconBgColor="bg-orange-50"
-                    title="Jenis sampah"
-                    description={wasteType}
-                  />
-                )}
+                <DetailItem
+                  icon={
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  }
+                  title="Jenis sampah"
+                  description="Campuran"
+                />
 
                 {/* Amount */}
                 {amount && (
@@ -185,8 +185,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                       </svg>
                     }
-                    iconBgColor="bg-blue-50"
-                    iconColor="text-blue-600"
                     title="Muatan sampah"
                     description={amount}
                   />
@@ -201,8 +199,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     }
-                    iconBgColor="bg-green-50"
-                    iconColor="text-green-600"
                     title="Kategori lokasi"
                     description={category}
                   />
@@ -222,18 +218,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           </>
         )}
       </div>
-
-      {/* Inline Styles for Animation */}
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            transform: translateY(100%);
-          }
-          to {
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </>
   );
 };

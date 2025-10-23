@@ -19,7 +19,7 @@ interface MapTilerMapProps {
   onMarkerClick?: (markerId: string) => void;
 }
 
-export const MapTilerMap: React.FC<MapTilerMapProps> = ({
+const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
   apiKey = 'FA6JDSQtAH4StLAmSKL0',
   className = 'w-full h-full',
   center = [110.3695, -7.7956],
@@ -30,6 +30,12 @@ export const MapTilerMap: React.FC<MapTilerMapProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
   const markersRef = useRef<Marker[]>([]);
+  const onMarkerClickRef = useRef(onMarkerClick);
+
+  // Keep onMarkerClick ref updated
+  useEffect(() => {
+    onMarkerClickRef.current = onMarkerClick;
+  }, [onMarkerClick]);
 
   // Initialize map only once
   useEffect(() => {
@@ -98,9 +104,9 @@ export const MapTilerMap: React.FC<MapTilerMapProps> = ({
         }
 
         // Add click handler
-        if (onMarkerClick && markerData.type === 'waste') {
+        if (onMarkerClickRef.current && markerData.type === 'waste') {
           el.addEventListener('click', () => {
-            onMarkerClick(markerData.id);
+            onMarkerClickRef.current?.(markerData.id);
           });
         }
 
@@ -112,7 +118,7 @@ export const MapTilerMap: React.FC<MapTilerMapProps> = ({
         markersRef.current.push(marker);
       }
     });
-  }, [markers, onMarkerClick]);
+  }, [markers]);
 
   return (
     <div 
@@ -124,5 +130,36 @@ export const MapTilerMap: React.FC<MapTilerMapProps> = ({
     />
   );
 };
+
+// Custom comparison function for React.memo
+const arePropsEqual = (prevProps: MapTilerMapProps, nextProps: MapTilerMapProps) => {
+  // Compare primitives
+  if (
+    prevProps.apiKey !== nextProps.apiKey ||
+    prevProps.className !== nextProps.className ||
+    prevProps.zoom !== nextProps.zoom
+  ) {
+    return false;
+  }
+
+  // Compare center array
+  if (
+    prevProps.center?.[0] !== nextProps.center?.[0] ||
+    prevProps.center?.[1] !== nextProps.center?.[1]
+  ) {
+    return false;
+  }
+
+  // Compare markers array by reference (since we memoize it in parent)
+  if (prevProps.markers !== nextProps.markers) {
+    return false;
+  }
+
+  // Don't compare onMarkerClick as we handle it with ref
+  return true;
+};
+
+// Memoize component to prevent unnecessary re-renders
+export const MapTilerMap = React.memo(MapTilerMapComponent, arePropsEqual);
 
 export default MapTilerMap;
