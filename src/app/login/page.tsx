@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Input, Checkbox, GoogleButton, PWAInstallPrompt } from '../components';
-import { supabase } from '@/lib/supabase';
+import { loginWithEmail, loginWithGoogle } from '@/lib/auth';
+import { getErrorMessage } from '@/utils/errorMessages';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,20 +52,13 @@ export default function LoginPage() {
     setErrors({});
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await loginWithEmail({
         email: formData.email,
         password: formData.password,
       });
 
       if (error) {
-        // Handle specific error messages
-        if (error.message.includes('Invalid login credentials')) {
-          setErrors({ email: 'Email atau password salah' });
-        } else if (error.message.includes('Email not confirmed')) {
-          setErrors({ email: 'Email belum diverifikasi. Silakan cek email Anda.' });
-        } else {
-          setErrors({ email: error.message });
-        }
+        setErrors({ email: getErrorMessage(error) });
         return;
       }
 
@@ -85,17 +79,14 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
+      setErrors({});
+      const { error } = await loginWithGoogle();
 
       if (error) {
         console.error('Google login error:', error);
-        setErrors({ email: 'Gagal login dengan Google. Silakan coba lagi.' });
+        setErrors({ email: getErrorMessage(error) });
       }
+      // If successful, user will be redirected by Supabase to the callback URL
     } catch (error) {
       console.error('Google login error:', error);
       setErrors({ email: 'Terjadi kesalahan. Silakan coba lagi.' });

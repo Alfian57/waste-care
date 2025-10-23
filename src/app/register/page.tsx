@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Input, Checkbox, GoogleButton } from '../components';
-import { supabase } from '@/lib/supabase';
+import { registerWithEmail, loginWithGoogle } from '@/lib/auth';
+import { getErrorMessage, isEmailAlreadyRegistered } from '@/utils/errorMessages';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -66,35 +67,19 @@ export default function RegisterPage() {
     setSuccessMessage('');
     
     try {
-      // Register user dengan Supabase
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await registerWithEmail({
         email: formData.email,
         password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-          },
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        },
+        fullName: formData.fullName,
       });
 
       if (error) {
-        // Handle specific error messages
-        if (error.message.includes('User already registered')) {
-          setErrors({ email: 'Email sudah terdaftar. Silakan gunakan email lain atau login.' });
-        } else if (error.message.includes('Password should be at least')) {
-          setErrors({ password: 'Password terlalu lemah. Gunakan minimal 6 karakter.' });
-        } else if (error.message.includes('Invalid email')) {
-          setErrors({ email: 'Format email tidak valid.' });
-        } else {
-          setErrors({ email: error.message });
-        }
+        setErrors({ email: getErrorMessage(error) });
         return;
       }
 
       if (data.user) {
-        // Check if email confirmation is required
-        if (data.user.identities && data.user.identities.length === 0) {
+        if (isEmailAlreadyRegistered({ user: data.user as unknown as { identities?: unknown[] } })) {
           setErrors({ email: 'Email sudah terdaftar. Silakan login atau gunakan email lain.' });
           return;
         }
@@ -128,17 +113,14 @@ export default function RegisterPage() {
 
   const handleGoogleSignup = async () => {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
+      setErrors({});
+      const { error } = await loginWithGoogle();
 
       if (error) {
         console.error('Google signup error:', error);
-        setErrors({ email: 'Gagal mendaftar dengan Google. Silakan coba lagi.' });
+        setErrors({ email: getErrorMessage(error) });
       }
+      // If successful, user will be redirected by Supabase to the callback URL
     } catch (error) {
       console.error('Google signup error:', error);
       setErrors({ email: 'Terjadi kesalahan. Silakan coba lagi.' });
