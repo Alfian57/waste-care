@@ -15,6 +15,7 @@ interface BottomSheetProps {
   amount?: string;
   category?: string;
   showWelcome?: boolean;
+  userName?: string;
   searchQuery?: string;
   onSearchChange?: (value: string) => void;
   onSearchClick?: () => void;
@@ -30,6 +31,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   amount,
   category,
   showWelcome = false,
+  userName = 'User',
   searchQuery = '',
   onSearchChange,
   onSearchClick
@@ -81,7 +83,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             <div className="space-y-3">
               <div>
                 <h1 className="text-xl font-semibold text-orange-600 font-['CircularStd'] mb-1">
-                  Halo, Alie Pratama
+                  Halo, {userName}
                 </h1>
                 <p className="text-sm text-gray-600 font-['CircularStd']">
                   Berkontribusi untuk jelajah sampah sekitar

@@ -2,12 +2,28 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { BottomNavigation, MapTilerMap, Button, BottomSheet } from '../components';
+import { useAuth } from '@/hooks/useAuth';
 import Image from 'next/image';
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+
+  // Get display name
+  const getDisplayName = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name;
+    }
+    if (user?.email) {
+      // Get first part of email before @
+      return user.email.split('@')[0];
+    }
+    return 'User';
+  };
+
+  const displayName = getDisplayName();
 
   // Sample waste markers data - memoized to prevent re-creation on every render
   const wasteMarkers = useMemo(() => [
@@ -103,6 +119,7 @@ export default function DashboardPage() {
         isOpen={true}
         onClose={handleCloseDetails}
         showWelcome={!showDetails}
+        userName={displayName}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSearchClick={handleSearch}
