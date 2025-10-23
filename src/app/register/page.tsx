@@ -2,9 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button, Input, Checkbox, GoogleButton } from '../components';
+import { supabase } from '@/lib/supabase';
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -13,6 +16,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -58,22 +62,87 @@ export default function RegisterPage() {
     if (!validateForm()) return;
 
     setLoading(true);
+    setErrors({});
+    setSuccessMessage('');
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Register attempt:', formData);
-      // TODO: Implement actual registration logic
+      // Register user dengan Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+
+      if (error) {
+        // Handle specific error messages
+        if (error.message.includes('User already registered')) {
+          setErrors({ email: 'Email sudah terdaftar. Silakan gunakan email lain atau login.' });
+        } else if (error.message.includes('Password should be at least')) {
+          setErrors({ password: 'Password terlalu lemah. Gunakan minimal 6 karakter.' });
+        } else if (error.message.includes('Invalid email')) {
+          setErrors({ email: 'Format email tidak valid.' });
+        } else {
+          setErrors({ email: error.message });
+        }
+        return;
+      }
+
+      if (data.user) {
+        // Check if email confirmation is required
+        if (data.user.identities && data.user.identities.length === 0) {
+          setErrors({ email: 'Email sudah terdaftar. Silakan login atau gunakan email lain.' });
+          return;
+        }
+
+        // Successfully registered
+        console.log('Registration successful:', data.user);
+        
+        // Show success message
+        setSuccessMessage('Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi akun.');
+        
+        // Clear form
+        setFormData({
+          fullName: '',
+          email: '',
+          password: ''
+        });
+        setAgreeTerms(false);
+
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          router.push('/login');
+        }, 3000);
+      }
     } catch (error) {
       console.error('Registration error:', error);
+      setErrors({ email: 'Terjadi kesalahan. Silakan coba lagi.' });
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSignup = async () => {
-    console.log('Google signup clicked');
-    // TODO: Implement Google OAuth
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+
+      if (error) {
+        console.error('Google signup error:', error);
+        setErrors({ email: 'Gagal mendaftar dengan Google. Silakan coba lagi.' });
+      }
+    } catch (error) {
+      console.error('Google signup error:', error);
+      setErrors({ email: 'Terjadi kesalahan. Silakan coba lagi.' });
+    }
   };
 
   return (
@@ -112,6 +181,20 @@ export default function RegisterPage() {
 
             {/* Registration Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Success Message */}
+              {successMessage && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <div className="flex items-start">
+                    <svg className="w-5 h-5 text-green-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm text-green-800 font-['CircularStd']">
+                      {successMessage}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <Input
                 type="text"
                 name="fullName"
@@ -231,6 +314,20 @@ export default function RegisterPage() {
 
           {/* Registration Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Success Message */}
+            {successMessage && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 text-green-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-green-800 font-['CircularStd']">
+                    {successMessage}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <Input
               type="text"
               name="fullName"
