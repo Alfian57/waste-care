@@ -1,54 +1,69 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '../../components';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Button, Toast } from '../../components';
+import { useReport } from '@/contexts/ReportContext';
+import { usePhotoManagement } from './usePhotoManagement';
+import PhotoHeader from './PhotoHeader';
+import PhotoGrid from './PhotoGrid';
 
 export default function KonfirmasiFotoPage() {
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { reportData, addPhoto, removePhoto } = useReport();
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
 
-  const handleUploadPhoto = () => {
-    setLoading(true);
-    // Simulate upload process
-    setTimeout(() => {
-      window.location.href = '/lapor/mengunggah';
-    }, 2000);
+  const {
+    loading,
+    photos,
+    fileInputRef,
+    handleFileSelect,
+    handleAddMorePhotos,
+    handleRemovePhoto,
+    handleUploadPhoto,
+  } = usePhotoManagement({
+    existingPhotos: reportData.photos,
+    onAddPhoto: addPhoto,
+    onRemovePhoto: removePhoto,
+  });
+
+  const onUploadClick = () => {
+    try {
+      handleUploadPhoto();
+    } catch (error) {
+      setToast({
+        message: error instanceof Error ? error.message : 'Terjadi kesalahan',
+        type: 'error',
+      });
+    }
+  };
+
+  const onFileSelectWithError = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      await handleFileSelect(event);
+    } catch (error) {
+      setToast({
+        message: error instanceof Error ? error.message : 'Gagal memproses gambar. Silakan coba lagi.',
+        type: 'error',
+      });
+    }
   };
 
   const handleBack = () => {
-    window.history.back();
+    router.back();
   };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <button onClick={handleBack} className="p-2 -ml-2">
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          
-          {/* Progress Bar */}
-          <div className="flex-1 mx-4">
-            <div className="flex items-center space-x-2">
-              <div className="flex-1 h-1 bg-orange-500 rounded"></div>
-              <div className="flex-1 h-1 bg-orange-500 rounded"></div>
-              <div className="flex-1 h-1 bg-orange-500 rounded"></div>
-              <div className="flex-1 h-1 bg-gray-200 rounded"></div>
-              <div className="flex-1 h-1 bg-gray-200 rounded"></div>
-            </div>
-          </div>
-          
-          <div className="w-8"></div>
-        </div>
-        
-        {/* Step Info */}
-        <div className="mt-3">
-          <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 3/5</p>
-        </div>
-      </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      <PhotoHeader onBack={handleBack} />
 
       {/* Content */}
       <div className="flex-1 px-6 py-8">
@@ -57,51 +72,28 @@ export default function KonfirmasiFotoPage() {
             Konfirmasi foto sampah
           </h1>
 
-          {/* Photos Grid */}
-          <div className="space-y-4">
-            {/* Photo 1 */}
-            <div className="relative">
-              <div className="aspect-video bg-gradient-to-br from-blue-400 to-green-400 rounded-xl overflow-hidden w-full h-64">
-                <Image
-                src="/images/template-image.png"
-                alt="Preview foto"
-                width={500}
-                height={500}
-                className="w-full h-full object-cover rounded-lg"
-                /> 
-              </div>
-              <button className="absolute top-3 right-3 w-8 h-8 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            </div>
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={onFileSelectWithError}
+            className="hidden"
+          />
 
-            {/* Photo 2 */}
-            <div className="relative">
-              <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-400 rounded-xl overflow-hidden w-full h-64">
-                <Image
-                src="/images/template-image.png"
-                alt="Preview foto"
-                width={500}
-                height={500}
-                className="w-full h-full object-cover rounded-lg"
-                /> 
-              </div>
-              <button className="absolute top-3 right-3 w-8 h-8 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
+          <PhotoGrid
+            photos={photos}
+            onRemovePhoto={handleRemovePhoto}
+            onAddMorePhotos={handleAddMorePhotos}
+            loading={loading}
+          />
         </div>
       </div>
 
-      {/* Bottom Button */}
       <div className="p-6">
         <Button
-          onClick={handleUploadPhoto}
+          onClick={onUploadClick}
           loading={loading}
           fullWidth
           className="bg-[#16a34a] hover:bg-[#15803d]"

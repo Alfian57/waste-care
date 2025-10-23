@@ -20,7 +20,7 @@ interface MapTilerMapProps {
 }
 
 const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
-  apiKey = 'FA6JDSQtAH4StLAmSKL0',
+  apiKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY || '',
   className = 'w-full h-full',
   center = [110.3695, -7.7956],
   zoom = 12,

@@ -7,3 +7,4 @@ export { default as BottomNavigation } from './BottomNavigation';
 export { default as MapTilerMap } from './MapTilerMap';
 export { default as BottomSheet } from './BottomSheet';
 export { default as DetailItem } from './DetailItem';
+export { default as Toast } from './Toast';

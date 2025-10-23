@@ -1,13 +1,72 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { BottomNavigation, Button } from '../components';
+import { logout } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function AkunPage() {
-  const handleLogout = () => {
-    // TODO: Implement logout logic
-    window.location.href = '/login';
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+    
+    setLoggingOut(true);
+    
+    try {
+      const { error } = await logout();
+      
+      if (error) {
+        console.error('Logout error:', error);
+        alert('Gagal logout. Silakan coba lagi.');
+        setLoggingOut(false);
+        return;
+      }
+
+      // Redirect handled by AuthProvider
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert('Gagal logout. Silakan coba lagi.');
+      setLoggingOut(false);
+    }
   };
+
+  // Get user initials for avatar
+  const getInitials = (name?: string, email?: string) => {
+    if (name) {
+      const parts = name.trim().split(' ');
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
+    }
+    if (email) {
+      return email.substring(0, 2).toUpperCase();
+    }
+    return 'U';
+  };
+
+  // Get display name
+  const getDisplayName = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name;
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'User';
+  };
+
+  // Show loading state (handled by ProtectedRoute, but keep for consistency)
+  if (loading || !user) {
+    return null;
+  }
+
+  const displayName = getDisplayName();
+  const initials = getInitials(user.user_metadata?.full_name, user.email || '');
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -22,12 +81,16 @@ export default function AkunPage() {
       <div className="px-6 py-6">
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-[#16a34a] rounded-full flex items-center justify-center">
-              <span className="text-2xl text-white">A</span>
+            <div className="w-16 h-16 bg-[#16a34a] rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl text-white font-semibold">{initials}</span>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 font-['CircularStd']">Alie Pratama</h2>
-              <p className="text-gray-600 font-['CircularStd']">alie.pratama@email.com</p>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl font-bold text-gray-900 font-['CircularStd'] truncate">
+                {displayName}
+              </h2>
+              <p className="text-gray-600 font-['CircularStd'] truncate">
+                {user.email || 'No email'}
+              </p>
             </div>
           </div>
         </div>
@@ -96,11 +159,13 @@ export default function AkunPage() {
         <div className="pt-4">
           <Button
             onClick={handleLogout}
+            loading={loggingOut}
+            disabled={loggingOut}
             fullWidth
             variant="outline"
             className="border-red-300 text-red-600 hover:bg-red-50"
           >
-            Keluar
+            {loggingOut ? 'Keluar...' : 'Keluar'}
           </Button>
         </div>
       </div>
