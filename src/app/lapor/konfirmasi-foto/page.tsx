@@ -61,13 +61,13 @@ export default function KonfirmasiFotoPage() {
           <div className="space-y-4">
             {/* Photo 1 */}
             <div className="relative">
-              <div className="aspect-video bg-gradient-to-br from-blue-400 to-green-400 rounded-xl overflow-hidden">
+              <div className="aspect-video bg-gradient-to-br from-blue-400 to-green-400 rounded-xl overflow-hidden w-full h-64">
                 <Image
-                src=""
+                src="/images/template-image.png"
                 alt="Preview foto"
                 width={500}
                 height={500}
-                className="w-full h-64 object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-lg"
                 /> 
               </div>
               <button className="absolute top-3 right-3 w-8 h-8 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
@@ -79,13 +79,13 @@ export default function KonfirmasiFotoPage() {
 
             {/* Photo 2 */}
             <div className="relative">
-              <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-400 rounded-xl overflow-hidden">
+              <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-400 rounded-xl overflow-hidden w-full h-64">
                 <Image
-                src=""
+                src="/images/template-image.png"
                 alt="Preview foto"
                 width={500}
                 height={500}
-                className="w-full h-64 object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-lg"
                 /> 
               </div>
               <button className="absolute top-3 right-3 w-8 h-8 bg-black bg-opacity-50 rounded-full flex items-center justify-center">

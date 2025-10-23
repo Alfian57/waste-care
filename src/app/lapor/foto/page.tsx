@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '../../components';
+import { Button, DetailItem } from '../../components';
 
 export default function LaporFotoPage() {
   const [loading, setLoading] = useState(false);
@@ -57,34 +57,29 @@ export default function LaporFotoPage() {
             Tambahkan foto sampah
           </h1>
 
-          {/* Camera Circle Placeholder */}
+          {/* Camera Image */}
           <div className="flex justify-center">
-            <div className="w-48 h-48 bg-gray-100 rounded-full flex items-center justify-center">
-              <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center">
-                <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-            </div>
+            <img 
+              src="/images/lapor-foto.png" 
+              alt="Add photo" 
+              className="w-48 h-48 object-contain"
+            />
           </div>
 
           {/* Description */}
           <div className="space-y-3">
-            <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-              <div className="flex-shrink-0 mt-1">
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <DetailItem
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-              </div>
-              <div className="flex-1 text-left">
-                <p className="text-sm font-medium text-gray-900 font-['CircularStd']">Pastikan gambar jelas</p>
-                <p className="text-sm text-gray-600 font-['CircularStd']">
-                  Ai kami akan menganalisa foto untuk validasi otomatis
-                </p>
-              </div>
-            </div>
+              }
+              iconBgColor="bg-gray-100"
+              iconColor="text-gray-500"
+              title="Pastikan gambar jelas"
+              description="Ai kami akan menganalisa foto untuk validasi otomatis"
+            />
           </div>
         </div>
       </div>

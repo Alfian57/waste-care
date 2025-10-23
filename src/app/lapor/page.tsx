@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button, BottomNavigation } from '../components';
+import { Button, BottomNavigation, DetailItem } from '../components';
 
 export default function LaporGPSPage() {
   const [loading, setLoading] = useState(false);
@@ -64,40 +64,31 @@ export default function LaporGPSPage() {
             Konfirmasi titik lokasi
           </h1>
 
-          {/* Location Circle Placeholder */}
+          {/* Location Image */}
           <div className="flex justify-center">
-            <div className="w-48 h-48 bg-gray-100 rounded-full flex items-center justify-center">
-              <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center">
-                <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-            </div>
+            <img 
+              src="/images/lapor-location.png" 
+              alt="Location confirmation" 
+              className="w-48 h-48 object-contain"
+            />
           </div>
 
           {/* Location Info */}
           <div className="space-y-3">
-            <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
-              <div className="flex-shrink-0 mt-1">
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <DetailItem
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-              </div>
-              <div className="flex-1 text-left">
-                <p className="text-sm font-medium text-gray-900 font-['CircularStd']">Lokasi mati</p>
-                <p className="text-sm text-gray-600 font-['CircularStd']">
-                  Izinkan untuk membagikan lokasi untuk melanjutkan
-                </p>
-              </div>
-              <button 
-                onClick={handleLocationEdit}
-                className="text-sm text-orange-500 font-medium font-['CircularStd']"
-              >
-                Izinkan
-              </button>
-            </div>
+              }
+              iconBgColor="bg-gray-100"
+              iconColor="text-gray-500"
+              title="Lokasi mati"
+              description="Izinkan untuk membagikan lokasi untuk melanjutkan"
+              actionText="Izinkan"
+              onActionClick={handleLocationEdit}
+            />
           </div>
         </div>
       </div>

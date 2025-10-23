@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '../../components';
+import { Button, DetailItem } from '../../components';
 
 export default function KonfirmasiDataPage() {
   const [loading, setLoading] = useState(false);
@@ -76,50 +76,38 @@ export default function KonfirmasiDataPage() {
           {/* Report Details */}
           <div className="space-y-4">
             {/* Waste Type */}
-            <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </div>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900 font-['CircularStd']">Jenis sampah</p>
-                <p className="text-sm text-gray-600 font-['CircularStd']">Campuran</p>
-              </div>
-            </div>
+            <DetailItem
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              }
+              title="Jenis sampah"
+              description="Campuran"
+            />
 
             {/* Waste Amount */}
-            <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                  </svg>
-                </div>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900 font-['CircularStd']">Muatan sampah</p>
-                <p className="text-sm text-gray-600 font-['CircularStd']">Lebih dari 10kg</p>
-              </div>
-            </div>
+            <DetailItem
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                </svg>
+              }
+              title="Muatan sampah"
+              description="Lebih dari 10kg"
+            />
 
             {/* Location */}
-            <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900 font-['CircularStd']">Kategori lokasi</p>
-                <p className="text-sm text-gray-600 font-['CircularStd']">Di tengah sungai</p>
-              </div>
-            </div>
+            <DetailItem
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              }
+              title="Kategori lokasi"
+              description="Di tengah sungai"
+            />
           </div>
         </div>
       </div>

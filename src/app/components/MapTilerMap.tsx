@@ -20,27 +20,29 @@ interface MapTilerMapProps {
 }
 
 export const MapTilerMap: React.FC<MapTilerMapProps> = ({
-  apiKey = 'FA6JDSQtAH4StLAmSKL0', // You can replace this later
+  apiKey = 'FA6JDSQtAH4StLAmSKL0',
   className = 'w-full h-full',
-  center = [110.3695, -7.7956], // Yogyakarta coordinates as default
+  center = [110.3695, -7.7956],
   zoom = 12,
   markers = [],
   onMarkerClick
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
+  const markersRef = useRef<Marker[]>([]);
 
+  // Initialize map only once
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current || map.current) return;
 
     // Initialize the map
     map.current = new Map({
       container: mapContainer.current,
-      style: MapStyle.SATELLITE, // You can change this to other styles
+      style: MapStyle.HYBRID,
       center: center,
       zoom: zoom,
       apiKey: apiKey,
-      attributionControl: false // Remove the attribution/watermark
+      attributionControl: false
     });
 
     // Force remove any remaining attribution elements
@@ -49,7 +51,23 @@ export const MapTilerMap: React.FC<MapTilerMapProps> = ({
       attributions?.forEach(attr => attr.remove());
     }, 100);
 
-    // Add markers
+    return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
+    };
+  }, [apiKey, center, zoom]);
+
+  // Update markers separately
+  useEffect(() => {
+    if (!map.current) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    // Add new markers
     markers.forEach((markerData) => {
       if (map.current) {
         // Create marker element
@@ -87,18 +105,14 @@ export const MapTilerMap: React.FC<MapTilerMapProps> = ({
         }
 
         // Add marker to map
-        new Marker({ element: el })
+        const marker = new Marker({ element: el })
           .setLngLat(markerData.coordinates)
           .addTo(map.current);
+        
+        markersRef.current.push(marker);
       }
     });
-
-    return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-    };
-  }, [apiKey, center, zoom, markers, onMarkerClick]);
+  }, [markers, onMarkerClick]);
 
   return (
     <div 
