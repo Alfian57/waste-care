@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRegister } from './useRegister';
-import { RegisterFormContainer } from '.';
+import RegisterFormContainer from './RegisterFormContainer';
 
 export default function RegisterPage() {
   const {
