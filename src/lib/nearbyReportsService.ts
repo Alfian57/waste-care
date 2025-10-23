@@ -57,13 +57,6 @@ export async function getNearbyReports(
       limit: limit.toString(),
     });
 
-    console.log('Fetching nearby reports with params:', {
-      latitude,
-      longitude,
-      radiusKm,
-      limit,
-    });
-
     // Call the edge function
     const url = `${supabaseUrl}/functions/v1/get-nearby-reports?${queryParams}`;
     
@@ -81,10 +74,7 @@ export async function getNearbyReports(
       headers,
     });
 
-    console.log('Response status:', response.status);
-
     const responseText = await response.text();
-    console.log('Raw response:', responseText);
 
     let data: NearbyReportsResponse;
     try {
@@ -93,8 +83,6 @@ export async function getNearbyReports(
       console.error('Failed to parse response:', e);
       throw new Error(`Server returned invalid JSON: ${responseText.substring(0, 200)}`);
     }
-
-    console.log('Parsed response data:', data);
 
     if (!response.ok) {
       return data;

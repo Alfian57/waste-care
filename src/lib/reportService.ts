@@ -52,11 +52,6 @@ export async function submitReport(params: SubmitReportParams): Promise<SubmitRe
       throw new Error('Missing Supabase URL configuration');
     }
 
-    console.log('Submitting report with params:', {
-      ...params,
-      imageBase64: `${params.imageBase64.substring(0, 50)}... (${params.imageBase64.length} chars)`
-    });
-
     // Call the edge function
     const response = await fetch(
       `${supabaseUrl}/functions/v1/submit-report`,
@@ -79,10 +74,8 @@ export async function submitReport(params: SubmitReportParams): Promise<SubmitRe
       }
     );
 
-    console.log('Response status:', response.status);
     
     const responseText = await response.text();
-    console.log('Raw response:', responseText);
     
     let data: SubmitReportResponse;
     try {
@@ -92,8 +85,6 @@ export async function submitReport(params: SubmitReportParams): Promise<SubmitRe
       throw new Error(`Server returned invalid JSON: ${responseText.substring(0, 200)}`);
     }
     
-    console.log('Parsed response data:', data);
-
     if (!response.ok) {
       return data;
     }

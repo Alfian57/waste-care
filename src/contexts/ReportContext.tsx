@@ -2,12 +2,21 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface Location {
+export interface Location {
   latitude: number;
   longitude: number;
 }
 
-interface ReportData {
+export interface AiValidation {
+  isWaste: boolean;
+  confidence: string;
+  reason?: string;
+  waste_type?: string;
+  waste_volume?: string;
+  location_category?: string;
+}
+
+export interface ReportData {
   location: Location | null;
   photos: string[]; // Base64 encoded images
   wasteType: 'organik' | 'anorganik' | 'berbahaya' | 'campuran' | null;
@@ -15,14 +24,7 @@ interface ReportData {
   locationCategory: 'sungai' | 'pinggir_jalan' | 'area_publik' | 'tanah_kosong' | 'lainnya' | null;
   notes?: string;
   // Store AI validation result after upload
-  aiValidation?: {
-    isWaste: boolean;
-    confidence: string;
-    reason?: string;
-    waste_type?: string;
-    waste_volume?: string;
-    location_category?: string;
-  };
+  aiValidation?: AiValidation;
 }
 
 interface ReportContextType {
@@ -83,7 +85,7 @@ export function ReportProvider({ children }: { children: ReactNode }) {
     setReportData(prev => ({ ...prev, notes }));
   };
 
-  const setAiValidation = (validation: ReportData['aiValidation']) => {
+  const setAiValidation = (validation: AiValidation | undefined) => {
     setReportData(prev => ({ ...prev, aiValidation: validation }));
   };
 
