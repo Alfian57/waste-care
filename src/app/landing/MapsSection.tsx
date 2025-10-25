@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 
 // Dynamically import MapTilerMap to avoid SSR issues
 const MapTilerMap = dynamic(
-  () => import('@/app/components/MapTilerMap'),
+  () => import('@/components/shared/MapTilerMap'),
   { ssr: false }
 );
 

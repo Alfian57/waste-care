@@ -10,6 +10,8 @@ interface DashboardBottomSheetProps {
   onSearchChange: (query: string) => void;
   onSearchClick: () => void;
   onClose: () => void;
+  showRoute?: boolean;
+  onToggleRoute?: () => void;
 }
 
 export default function DashboardBottomSheet({
@@ -20,6 +22,8 @@ export default function DashboardBottomSheet({
   onSearchChange,
   onSearchClick,
   onClose,
+  showRoute = false,
+  onToggleRoute,
 }: DashboardBottomSheetProps) {
   const router = useRouter();
 
@@ -69,14 +73,17 @@ export default function DashboardBottomSheet({
       wasteType={selectedMarker?.wasteType || ''}
       amount={selectedMarker?.amount || ''}
       category={selectedMarker?.category || ''}
-      reportId={selectedMarker ? parseInt(selectedMarker.id) : undefined}
-      reportLocation={selectedMarker ? {
-        latitude: selectedMarker.coordinates[1],
-        longitude: selectedMarker.coordinates[0]
-      } : undefined}
+      reportId={selectedMarker?.id}
+      reportLocation={selectedMarker ? [
+        selectedMarker.coordinates[0],
+        selectedMarker.coordinates[1]
+      ] : undefined}
       hasCampaign={selectedMarker?.hasCampaign || false}
       onRevalidateClick={handleRevalidateClick}
       onCreateCampaignClick={handleCreateCampaignClick}
+      showRouteButton={showDetails && !!selectedMarker}
+      showRoute={showRoute}
+      onToggleRoute={onToggleRoute}
     />
   );
 }

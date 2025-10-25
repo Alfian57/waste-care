@@ -17,6 +17,9 @@ interface MapTilerMapProps {
     location?: string;
   }>;
   onMarkerClick?: (markerId: string) => void;
+  showRoute?: boolean;
+  routeStart?: [number, number] | null;
+  routeEnd?: [number, number] | null;
 }
 
 const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
@@ -25,12 +28,18 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
   center = [110.3695, -7.7956],
   zoom = 12,
   markers = [],
-  onMarkerClick
+  onMarkerClick,
+  showRoute = false,
+  routeStart = null,
+  routeEnd = null
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
   const markersRef = useRef<Marker[]>([]);
   const onMarkerClickRef = useRef(onMarkerClick);
+  const routeLayerId = 'route';
+  const routeOutlineLayerId = 'route-outline';
+  const routeSourceId = 'route';
 
   // Keep onMarkerClick ref updated
   useEffect(() => {
@@ -120,6 +129,110 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
     });
   }, [markers]);
 
+  // Handle route display
+  useEffect(() => {
+    if (!map.current || !showRoute || !routeStart || !routeEnd) {
+      // Remove route if conditions not met
+      if (map.current?.getLayer(routeLayerId)) {
+        map.current.removeLayer(routeLayerId);
+      }
+      if (map.current?.getLayer(routeOutlineLayerId)) {
+        map.current.removeLayer(routeOutlineLayerId);
+      }
+      if (map.current?.getSource(routeSourceId)) {
+        map.current.removeSource(routeSourceId);
+      }
+      return;
+    }
+
+    const fetchRoute = async () => {
+      try {
+        // OSRM API call
+        const url = `https://router.project-osrm.org/route/v1/driving/${routeStart[0]},${routeStart[1]};${routeEnd[0]},${routeEnd[1]}?overview=full&geometries=geojson`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+          console.error('No route found');
+          return;
+        }
+
+        const route = data.routes[0].geometry;
+
+        // Wait for map style to be loaded
+        if (!map.current!.isStyleLoaded()) {
+          map.current!.once('styledata', () => {
+            addRouteToMap(route);
+          });
+        } else {
+          addRouteToMap(route);
+        }
+      } catch (error) {
+        console.error('Error fetching route:', error);
+      }
+    };
+
+    const addRouteToMap = (route: any) => {
+      if (!map.current) return;
+
+      // Remove existing route layers
+      if (map.current.getLayer(routeLayerId)) {
+        map.current.removeLayer(routeLayerId);
+      }
+      if (map.current.getLayer(routeOutlineLayerId)) {
+        map.current.removeLayer(routeOutlineLayerId);
+      }
+      if (map.current.getSource(routeSourceId)) {
+        map.current.removeSource(routeSourceId);
+      }
+
+      // Add route source
+      map.current.addSource(routeSourceId, {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: route
+        }
+      });
+
+      // Add white outline layer (rendered first, appears behind)
+      map.current.addLayer({
+        id: routeOutlineLayerId,
+        type: 'line',
+        source: routeSourceId,
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#ffffff',
+          'line-width': 6,
+          'line-opacity': 1
+        }
+      });
+
+      // Add blue route layer on top
+      map.current.addLayer({
+        id: routeLayerId,
+        type: 'line',
+        source: routeSourceId,
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#3b82f6',
+          'line-width': 4,
+          'line-opacity': 0.8
+        }
+      });
+    };
+
+    fetchRoute();
+  }, [showRoute, routeStart, routeEnd]);
+
   return (
     <div 
       ref={mapContainer} 
@@ -137,7 +250,8 @@ const arePropsEqual = (prevProps: MapTilerMapProps, nextProps: MapTilerMapProps)
   if (
     prevProps.apiKey !== nextProps.apiKey ||
     prevProps.className !== nextProps.className ||
-    prevProps.zoom !== nextProps.zoom
+    prevProps.zoom !== nextProps.zoom ||
+    prevProps.showRoute !== nextProps.showRoute
   ) {
     return false;
   }
@@ -146,6 +260,16 @@ const arePropsEqual = (prevProps: MapTilerMapProps, nextProps: MapTilerMapProps)
   if (
     prevProps.center?.[0] !== nextProps.center?.[0] ||
     prevProps.center?.[1] !== nextProps.center?.[1]
+  ) {
+    return false;
+  }
+
+  // Compare route coordinates
+  if (
+    prevProps.routeStart?.[0] !== nextProps.routeStart?.[0] ||
+    prevProps.routeStart?.[1] !== nextProps.routeStart?.[1] ||
+    prevProps.routeEnd?.[0] !== nextProps.routeEnd?.[0] ||
+    prevProps.routeEnd?.[1] !== nextProps.routeEnd?.[1]
   ) {
     return false;
   }
