@@ -33,14 +33,17 @@ export interface Database {
         Row: {
           id: string
           created_at: string
+          exp: number
         }
         Insert: {
           id: string
           created_at?: string
+          exp?: number
         }
         Update: {
           id?: string
           created_at?: string
+          exp?: number
         }
       }
       campaigns: {

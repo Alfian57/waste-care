@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { getNearbyReports, type ReportLocation } from './nearbyReportsService';
 import type { Campaign, CampaignRow, CampaignWithParticipants } from '@/types/campaign.types';
+import { addExpForJoinCampaign } from './expService';
 
 interface CreateCampaignParams {
   latitude: number;
@@ -109,6 +110,14 @@ export async function joinCampaign(campaignId: number, userId: string): Promise<
       .insert(insertData as never);
 
     if (error) throw error;
+
+    // Jika berhasil join campaign, tambahkan EXP ke user
+    try {
+      await addExpForJoinCampaign(userId);
+    } catch (expError) {
+      // Log error tapi tidak gagalkan proses join campaign
+      console.error('Failed to add EXP for joining campaign:', expError);
+    }
 
     return true;
   } catch (error) {
