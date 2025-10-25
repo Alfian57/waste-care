@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ReportProvider } from "@/contexts/ReportContext";
+import { RevalidationProvider } from "@/contexts/RevalidationContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -82,7 +83,9 @@ export default function RootLayout({
         <AuthProvider>
           <ProtectedRoute>
             <ReportProvider>
-              {children}
+              <RevalidationProvider>
+                {children}
+              </RevalidationProvider>
             </ReportProvider>
           </ProtectedRoute>
         </AuthProvider>

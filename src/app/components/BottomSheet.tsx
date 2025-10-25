@@ -18,6 +18,9 @@ interface BottomSheetProps {
   searchQuery?: string;
   onSearchChange?: (value: string) => void;
   onSearchClick?: () => void;
+  reportId?: number;
+  reportLocation?: { latitude: number; longitude: number };
+  onRevalidateClick?: () => void;
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({
@@ -33,7 +36,10 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   userName = 'User',
   searchQuery = '',
   onSearchChange,
-  onSearchClick
+  onSearchClick,
+  reportId,
+  reportLocation,
+  onRevalidateClick
 }) => {
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
 
@@ -210,6 +216,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                   <Button
                     fullWidth
                     className="bg-[#16a34a] hover:bg-[#15803d]"
+                    onClick={onRevalidateClick}
                   >
                     Laporkan sudah bersih
                   </Button>

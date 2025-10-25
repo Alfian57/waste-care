@@ -1,5 +1,6 @@
 import { BottomSheet } from '@/app/components';
 import type { WasteMarker } from '.';
+import { useRouter } from 'next/navigation';
 
 interface DashboardBottomSheetProps {
   showDetails: boolean;
@@ -20,6 +21,21 @@ export default function DashboardBottomSheet({
   onSearchClick,
   onClose,
 }: DashboardBottomSheetProps) {
+  const router = useRouter();
+
+  const handleRevalidateClick = () => {
+    if (!selectedMarker) return;
+    
+    // Navigate to revalidation page with report data
+    const params = new URLSearchParams({
+      reportId: selectedMarker.id.toString(),
+      lat: selectedMarker.coordinates[1].toString(),
+      lng: selectedMarker.coordinates[0].toString(),
+    });
+    
+    router.push(`/revalidasi?${params.toString()}`);
+  };
+
   return (
     <BottomSheet
       isOpen={true}
@@ -35,6 +51,12 @@ export default function DashboardBottomSheet({
       wasteType={selectedMarker?.wasteType || ''}
       amount={selectedMarker?.amount || ''}
       category={selectedMarker?.category || ''}
+      reportId={selectedMarker ? parseInt(selectedMarker.id) : undefined}
+      reportLocation={selectedMarker ? {
+        latitude: selectedMarker.coordinates[1],
+        longitude: selectedMarker.coordinates[0]
+      } : undefined}
+      onRevalidateClick={handleRevalidateClick}
     />
   );
 }
