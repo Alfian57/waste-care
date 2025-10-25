@@ -1,67 +1,41 @@
 'use client';
 
-import React from 'react';
-
-interface CityStatistic {
-  rank: number;
-  city: string;
-  province: string;
-  score: number;
-  completedCampaigns: number;
-  activeReports: number;
-  cleanedAreas: number;
-}
+import React, { useEffect, useState } from 'react';
+import { 
+  fetchTopCities, 
+  fetchOverallStatistics, 
+  type CityStatistic,
+  type OverallStatistics 
+} from '@/lib/statisticsService';
 
 export default function StatisticsSection() {
-  // TODO: Fetch from database based on campaign completion scores
-  // For now, using dummy data
-  const topCities: CityStatistic[] = [
-    {
-      rank: 1,
-      city: 'Jakarta',
-      province: 'DKI Jakarta',
-      score: 95,
-      completedCampaigns: 142,
-      activeReports: 234,
-      cleanedAreas: 567
-    },
-    {
-      rank: 2,
-      city: 'Surabaya',
-      province: 'Jawa Timur',
-      score: 92,
-      completedCampaigns: 128,
-      activeReports: 198,
-      cleanedAreas: 512
-    },
-    {
-      rank: 3,
-      city: 'Bandung',
-      province: 'Jawa Barat',
-      score: 89,
-      completedCampaigns: 115,
-      activeReports: 176,
-      cleanedAreas: 489
-    },
-    {
-      rank: 4,
-      city: 'Semarang',
-      province: 'Jawa Tengah',
-      score: 86,
-      completedCampaigns: 98,
-      activeReports: 145,
-      cleanedAreas: 423
-    },
-    {
-      rank: 5,
-      city: 'Yogyakarta',
-      province: 'DI Yogyakarta',
-      score: 84,
-      completedCampaigns: 87,
-      activeReports: 132,
-      cleanedAreas: 398
+  const [topCities, setTopCities] = useState<CityStatistic[]>([]);
+  const [overallStats, setOverallStats] = useState<OverallStatistics>({
+    totalCampaignsCompleted: 0,
+    totalParticipants: 0,
+    totalCleanedAreas: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStatistics();
+  }, []);
+
+  const loadStatistics = async () => {
+    try {
+      setLoading(true);
+      const [cities, stats] = await Promise.all([
+        fetchTopCities(),
+        fetchOverallStatistics(),
+      ]);
+      setTopCities(cities);
+      setOverallStats(stats);
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getRankBadgeColor = (rank: number) => {
     switch (rank) {
@@ -116,71 +90,94 @@ export default function StatisticsSection() {
             </div>
 
             <div className="space-y-4">
-              {topCities.map((city) => (
-                <div
-                  key={city.rank}
-                  className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center gap-4">
-                    {/* Rank Badge */}
-                    <div
-                      className={`w-14 h-14 ${getRankBadgeColor(city.rank)} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}
-                    >
-                      {getRankIcon(city.rank)}
-                      <span className="text-2xl font-bold text-white">{city.rank}</span>
-                    </div>
-
-                    {/* City Info */}
-                    <div className="flex-1">
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <h4 className="text-xl font-bold text-gray-900">{city.city}</h4>
-                        <span className="text-sm text-gray-500">{city.province}</span>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm text-gray-600">Skor Kebersihan</span>
-                          <span className="text-sm font-semibold text-emerald-600">{city.score}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
-                            style={{ width: `${city.score}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Statistics */}
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-emerald-600">{city.completedCampaigns}</div>
-                          <div className="text-xs text-gray-600">Campaign Selesai</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-600">{city.activeReports}</div>
-                          <div className="text-xs text-gray-600">Laporan Aktif</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-orange-600">{city.cleanedAreas}</div>
-                          <div className="text-xs text-gray-600">Area Dibersihkan</div>
+              {loading ? (
+                // Loading skeleton
+                Array.from({ length: 5 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-xl p-6 shadow-sm animate-pulse"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gray-200 rounded-xl flex-shrink-0"></div>
+                      <div className="flex-1 space-y-3">
+                        <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+                        <div className="h-2 bg-gray-200 rounded w-full"></div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="h-8 bg-gray-200 rounded"></div>
+                          <div className="h-8 bg-gray-200 rounded"></div>
+                          <div className="h-8 bg-gray-200 rounded"></div>
                         </div>
                       </div>
                     </div>
-
-                    {/* Trophy for top 3 */}
-                    {city.rank <= 3 && (
-                      <div className="hidden md:block">
-                        <div className="text-6xl opacity-20">
-                          {city.rank === 1 && '🏆'}
-                          {city.rank === 2 && '🥈'}
-                          {city.rank === 3 && '🥉'}
-                        </div>
-                      </div>
-                    )}
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                topCities.map((city) => (
+                  <div
+                    key={city.rank}
+                    className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Rank Badge */}
+                      <div
+                        className={`w-14 h-14 ${getRankBadgeColor(city.rank)} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}
+                      >
+                        {getRankIcon(city.rank)}
+                        <span className="text-2xl font-bold text-white">{city.rank}</span>
+                      </div>
+
+                      {/* City Info */}
+                      <div className="flex-1">
+                        <div className="flex items-baseline gap-2 mb-1">
+                          <h4 className="text-xl font-bold text-gray-900">{city.city}</h4>
+                          <span className="text-sm text-gray-500">{city.province}</span>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="mb-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm text-gray-600">Skor Kebersihan</span>
+                            <span className="text-sm font-semibold text-emerald-600">{city.score}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
+                              style={{ width: `${city.score}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Statistics */}
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-emerald-600">{city.completedCampaigns}</div>
+                            <div className="text-xs text-gray-600">Campaign Selesai</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-blue-600">{city.activeReports}</div>
+                            <div className="text-xs text-gray-600">Laporan Aktif</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-orange-600">{city.cleanedAreas}</div>
+                            <div className="text-xs text-gray-600">Area Dibersihkan</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Trophy for top 3 */}
+                      {city.rank <= 3 && (
+                        <div className="hidden md:block">
+                          <div className="text-6xl opacity-20">
+                            {city.rank === 1 && '🏆'}
+                            {city.rank === 2 && '🥈'}
+                            {city.rank === 3 && '🥉'}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -193,7 +190,13 @@ export default function StatisticsSection() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h4 className="text-3xl font-bold text-gray-900 mb-2">1,234</h4>
+                <h4 className="text-3xl font-bold text-gray-900 mb-2">
+                  {loading ? (
+                    <div className="animate-pulse h-9 w-24 bg-gray-200 rounded mx-auto"></div>
+                  ) : (
+                    overallStats.totalCampaignsCompleted.toLocaleString('id-ID')
+                  )}
+                </h4>
                 <p className="text-gray-600">Total Campaign Selesai</p>
               </div>
             </div>
@@ -205,7 +208,13 @@ export default function StatisticsSection() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
-                <h4 className="text-3xl font-bold text-gray-900 mb-2">12,456</h4>
+                <h4 className="text-3xl font-bold text-gray-900 mb-2">
+                  {loading ? (
+                    <div className="animate-pulse h-9 w-24 bg-gray-200 rounded mx-auto"></div>
+                  ) : (
+                    overallStats.totalParticipants.toLocaleString('id-ID')
+                  )}
+                </h4>
                 <p className="text-gray-600">Partisipan Aktif</p>
               </div>
             </div>
@@ -217,7 +226,13 @@ export default function StatisticsSection() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                   </svg>
                 </div>
-                <h4 className="text-3xl font-bold text-gray-900 mb-2">2,345</h4>
+                <h4 className="text-3xl font-bold text-gray-900 mb-2">
+                  {loading ? (
+                    <div className="animate-pulse h-9 w-24 bg-gray-200 rounded mx-auto"></div>
+                  ) : (
+                    overallStats.totalCleanedAreas.toLocaleString('id-ID')
+                  )}
+                </h4>
                 <p className="text-gray-600">Area Dibersihkan</p>
               </div>
             </div>
