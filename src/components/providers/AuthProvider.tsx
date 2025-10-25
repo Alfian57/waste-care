@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { ensureProfileExists } from '@/lib/expService';
 
 interface AuthContextType {
   user: User | null;
@@ -38,6 +39,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user ?? null);
         
+        // Ensure profile exists when user is authenticated
+        if (session?.user) {
+          console.log('[AUTH] User authenticated, ensuring profile exists');
+          await ensureProfileExists(session.user.id);
+        }
+        
         // Redirect logic after getting session
         if (!session?.user && !isPublicRoute) {
           // Not logged in and trying to access protected route
@@ -58,8 +65,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('[AUTH] Auth state changed:', event);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Ensure profile exists when user signs in
+        if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
+          console.log('[AUTH] User signed in/updated, ensuring profile exists');
+          await ensureProfileExists(session.user.id);
+        }
 
         // Handle auth state changes
         if (event === 'SIGNED_OUT') {

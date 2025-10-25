@@ -1,9 +1,14 @@
 import { supabase } from './supabase';
 import { EXP_CONFIG, type ExpActionType } from '@/config/exp.config';
+import type { Database } from '@/types/database.types';
 
 /**
  * Service untuk mengelola Experience Points (EXP) user
  */
+
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
+type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
 interface AddExpParams {
   userId: string;
@@ -25,66 +30,144 @@ interface AddExpResult {
  */
 export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> {
   try {
-    const { userId, amount } = params;
+    const { userId, amount, action } = params;
+
+    console.log(`[EXP] Adding ${amount} EXP to user ${userId} for action: ${action}`);
+
+    // Try using RPC function first (if available in Supabase)
+    try {
+      const { data: rpcResult, error: rpcError } = await supabase
+        // @ts-expect-error - RPC function may not exist yet in database
+        .rpc('add_exp_to_profile', {
+          user_id: userId,
+          exp_amount: amount
+        });
+
+      // @ts-expect-error - Dynamic RPC result type
+      if (!rpcError && rpcResult && Array.isArray(rpcResult) && rpcResult.length > 0) {
+        // @ts-expect-error - Dynamic RPC result
+        const newExp = rpcResult[0].new_exp;
+        console.log(`[EXP] Successfully updated exp to ${newExp} via RPC`);
+        return {
+          success: true,
+          newExp,
+        };
+      }
+      
+      console.log('[EXP] RPC function not available, using fallback method');
+    } catch (rpcError) {
+      console.log('[EXP] RPC function error, using fallback method:', rpcError);
+    }
+
+    // Fallback: Manual update
+    // First, ensure profile exists
+    const profileExists = await ensureProfileExists(userId);
+    if (!profileExists) {
+      console.error('[EXP] Failed to ensure profile exists');
+      return {
+        success: false,
+        error: 'Gagal memastikan profil user ada',
+      };
+    }
 
     // Get current exp
     const { data: profile, error: fetchError } = await supabase
       .from('profiles')
       .select('exp')
       .eq('id', userId)
-      .maybeSingle(); // Use maybeSingle to handle 0 rows
-
-    // If profile doesn't exist, create it first
-    if (!profile && !fetchError) {
-      const { error: createError } = await supabase
-        .from('profiles')
-        .insert({ id: userId, exp: amount } as never);
-
-      if (createError) {
-        console.error('Error creating user profile:', createError);
-        return {
-          success: false,
-          error: 'Gagal membuat profil user',
-        };
-      }
-
-      return {
-        success: true,
-        newExp: amount,
-      };
-    }
+      .single();
 
     if (fetchError) {
-      console.error('Error fetching user profile:', fetchError);
+      console.error('[EXP] Error fetching user profile:', fetchError);
+      console.error('[EXP] Fetch error details:', {
+        code: fetchError.code,
+        message: fetchError.message,
+        details: fetchError.details,
+        hint: fetchError.hint,
+      });
       return {
         success: false,
-        error: 'Gagal mengambil data profil user',
+        error: `Gagal mengambil data profil user: ${fetchError.message}`,
       };
     }
 
-    const currentExp = profile ? ((profile as unknown) as { exp: number }).exp || 0 : 0;
+    if (!profile) {
+      console.error('[EXP] Profile not found after ensureProfileExists');
+      return {
+        success: false,
+        error: 'Profil user tidak ditemukan',
+      };
+    }
+
+    // @ts-expect-error - Supabase type inference issue
+    const currentExp = profile?.exp || 0;
     const newExp = currentExp + amount;
 
-    // Update exp
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ exp: newExp } as never)
-      .eq('id', userId);
+    console.log(`[EXP] Updating exp from ${currentExp} to ${newExp}`);
 
-    if (updateError) {
-      console.error('Error updating user exp:', updateError);
+    // Verify we're updating the correct user (auth.uid() should match userId)
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) {
+      console.error('[EXP] No active session found');
       return {
         success: false,
-        error: 'Gagal mengupdate EXP user',
+        error: 'Tidak ada sesi aktif',
       };
     }
 
+    if (session.user.id !== userId) {
+      console.error('[EXP] Session user ID does not match target user ID');
+      return {
+        success: false,
+        error: 'User ID tidak cocok dengan sesi',
+      };
+    }
+
+    console.log('[EXP] Session verified, user ID:', session.user.id);
+
+    // Update exp using the session user's ID
+    const profileUpdate: ProfileUpdate = { exp: newExp };
+    console.log('[EXP] Attempting update with data:', profileUpdate);
+    console.log('[EXP] Update condition: id =', session.user.id);
+    
+    const { data: updateResult, error: updateError } = await supabase
+      .from('profiles')
+      // @ts-expect-error - Supabase type inference issue with profiles table
+      .update(profileUpdate)
+      .eq('id', session.user.id)  // Use session user ID instead
+      .select();
+
+    console.log('[EXP] Update result:', { updateResult, updateError });
+
+    if (updateError) {
+      console.error('[EXP] Error updating user exp:', updateError);
+      console.error('[EXP] Update error details:', {
+        code: updateError.code,
+        message: updateError.message,
+        details: updateError.details,
+        hint: updateError.hint,
+      });
+      return {
+        success: false,
+        error: `Gagal mengupdate EXP user: ${updateError.message}`,
+      };
+    }
+
+    if (!updateResult || updateResult.length === 0) {
+      console.error('[EXP] Update returned no rows');
+      return {
+        success: false,
+        error: 'Update tidak mempengaruhi row manapun',
+      };
+    }
+
+    console.log(`[EXP] Successfully updated exp to ${newExp}`);
     return {
       success: true,
       newExp,
     };
   } catch (error) {
-    console.error('Error in addExpToUser:', error);
+    console.error('[EXP] Error in addExpToUser:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -141,25 +224,40 @@ export async function addExpForCreateCampaign(userId: string): Promise<AddExpRes
  */
 export async function getUserExp(userId: string): Promise<number> {
   try {
+    // Get session to verify user
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) {
+      console.error('[EXP] No active session for getUserExp');
+      return 0;
+    }
+
+    // Verify session user matches target user
+    if (session.user.id !== userId) {
+      console.error('[EXP] Session user ID does not match target user ID in getUserExp');
+      return 0;
+    }
+
     const { data, error } = await supabase
       .from('profiles')
       .select('exp')
-      .eq('id', userId)
-      .maybeSingle(); // Use maybeSingle instead of single to handle 0 rows
+      .eq('id', session.user.id)  // Use session user ID
+      .maybeSingle();
 
     if (error) {
-      console.error('Error fetching user exp:', error);
+      console.error('[EXP] Error fetching user exp:', error);
       return 0;
     }
 
     // If no profile exists, return 0
     if (!data) {
+      console.log('[EXP] No profile found for user, returning 0');
       return 0;
     }
 
-    return data ? ((data as unknown) as { exp: number }).exp || 0 : 0;
+    // @ts-expect-error - Supabase type inference issue
+    return data.exp || 0;
   } catch (error) {
-    console.error('Error in getUserExp:', error);
+    console.error('[EXP] Error in getUserExp:', error);
     return 0;
   }
 }
@@ -170,36 +268,61 @@ export async function getUserExp(userId: string): Promise<number> {
  */
 export async function ensureProfileExists(userId: string): Promise<boolean> {
   try {
+    console.log(`[EXP] Ensuring profile exists for user: ${userId}`);
+    
+    // Get session to verify user
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) {
+      console.error('[EXP] No active session for ensureProfileExists');
+      return false;
+    }
+
+    // Verify session user matches target user
+    if (session.user.id !== userId) {
+      console.error('[EXP] Session user ID does not match target user ID in ensureProfileExists');
+      return false;
+    }
+    
     // Check if profile exists
     const { data, error } = await supabase
       .from('profiles')
       .select('id')
-      .eq('id', userId)
+      .eq('id', session.user.id)  // Use session user ID
       .maybeSingle();
 
     if (error && error.code !== 'PGRST116') {
-      console.error('Error checking profile:', error);
+      console.error('[EXP] Error checking profile:', error);
       return false;
     }
 
     // If profile exists, return true
     if (data) {
+      console.log(`[EXP] Profile already exists for user: ${userId}`);
       return true;
     }
 
-    // Create new profile
+    // Create new profile using session user ID
+    console.log(`[EXP] Creating new profile for user: ${userId}`);
+    const newProfile: ProfileInsert = { id: session.user.id, exp: 0 };
     const { error: insertError } = await supabase
       .from('profiles')
-      .insert({ id: userId, exp: 0 } as never);
+      // @ts-expect-error - Supabase type inference issue with profiles table
+      .insert(newProfile);
 
     if (insertError) {
-      console.error('Error creating profile:', insertError);
+      // Check if error is due to duplicate key (profile was created by another request)
+      if (insertError.code === '23505') {
+        console.log('[EXP] Profile already exists (created by concurrent request)');
+        return true;
+      }
+      console.error('[EXP] Error creating profile:', insertError);
       return false;
     }
 
+    console.log(`[EXP] Successfully created profile for user: ${userId}`);
     return true;
   } catch (error) {
-    console.error('Error in ensureProfileExists:', error);
+    console.error('[EXP] Error in ensureProfileExists:', error);
     return false;
   }
 }

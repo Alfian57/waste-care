@@ -13,19 +13,16 @@ export interface Database {
         Row: {
           id: string
           email: string
-          username: string
           encrypted_password: string
         }
         Insert: {
           id?: string
           email: string
-          username: string
           encrypted_password: string
         }
         Update: {
           id?: string
           email?: string
-          username?: string
           encrypted_password?: string
         }
       }
@@ -45,6 +42,14 @@ export interface Database {
           created_at?: string
           exp?: number
         }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       campaigns: {
         Row: {
