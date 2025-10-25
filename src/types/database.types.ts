@@ -29,6 +29,81 @@ export interface Database {
           encrypted_password?: string
         }
       }
+      profiles: {
+        Row: {
+          id: string
+          created_at: string
+          exp: number
+        }
+        Insert: {
+          id: string
+          created_at?: string
+          exp?: number
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          exp?: number
+        }
+      }
+      campaigns: {
+        Row: {
+          id: number
+          title: string
+          description: string
+          start_time: string
+          end_time: string
+          max_participants: number
+          created_at: string
+          status: 'upcoming' | 'ongoing' | 'finished'
+          report_id: number
+          organizer_name: string
+          organizer_type: 'personal' | 'organization'
+        }
+        Insert: {
+          id?: number
+          title: string
+          description: string
+          start_time: string
+          end_time: string
+          max_participants?: number
+          created_at?: string
+          status?: 'upcoming' | 'ongoing' | 'finished'
+          report_id: number
+          organizer_name: string
+          organizer_type: 'personal' | 'organization'
+        }
+        Update: {
+          id?: number
+          title?: string
+          description?: string
+          start_time?: string
+          end_time?: string
+          max_participants?: number
+          created_at?: string
+          status?: 'upcoming' | 'ongoing' | 'finished'
+          report_id?: number
+          organizer_name?: string
+          organizer_type?: 'personal' | 'organization'
+        }
+      }
+      campaign_participants: {
+        Row: {
+          campaign_id: number
+          profile_id: string
+          joined_at: string
+        }
+        Insert: {
+          campaign_id: number
+          profile_id: string
+          joined_at?: string
+        }
+        Update: {
+          campaign_id?: number
+          profile_id?: string
+          joined_at?: string
+        }
+      }
       reports: {
         Row: {
           id: number
@@ -75,9 +150,11 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      location_category_enum: 'sungai' | 'pinggir_jalan' | 'area_public' | 'tanah_kosong' | 'lainnya'
+      location_category_enum: 'sungai' | 'pinggir_jalan' | 'area_publik' | 'tanah_kosong' | 'lainnya'
       waste_type_enum: 'organik' | 'anorganik' | 'berbahaya' | 'campuran'
       waste_volume_enum: 'kurang_dari_1kg' | '1_5kg' | '6_10kg' | 'lebih_dari_10kg'
+      campaign_status_enum: 'upcoming' | 'ongoing' | 'finished'
+      campaign_organizer_type_enum: 'personal' | 'organization'
     }
   }
 }

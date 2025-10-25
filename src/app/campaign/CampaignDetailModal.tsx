@@ -137,14 +137,18 @@ export function CampaignDetailModal({ campaign, isOpen, onClose, onJoin }: Campa
                   ))}
                 </div>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-600">Estimasi:</span>
-                <span className="text-sm font-medium text-orange-700">{campaign.estimatedVolume}</span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-600">Titik Lokasi:</span>
-                <span className="text-sm font-medium text-blue-700">{campaign.reportIds.length} lokasi</span>
-              </div>
+              {campaign.estimatedVolume && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-600">Estimasi:</span>
+                  <span className="text-sm font-medium text-orange-700">{campaign.estimatedVolume}</span>
+                </div>
+              )}
+              {campaign.reportIds && campaign.reportIds?.length > 0 && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-600">Titik Lokasi:</span>
+                  <span className="text-sm font-medium text-blue-700">{campaign.reportIds?.length} lokasi</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -156,7 +160,7 @@ export function CampaignDetailModal({ campaign, isOpen, onClose, onJoin }: Campa
             >
               Tutup
             </button>
-            {campaign.status === 'upcoming' && !isFull && (
+            {campaign.status === 'upcoming' && !isFull && !campaign.isJoined && (
               <button
                 onClick={() => {
                   onJoin(campaign.id);
@@ -167,7 +171,18 @@ export function CampaignDetailModal({ campaign, isOpen, onClose, onJoin }: Campa
                 Ikut Bergabung
               </button>
             )}
-            {isFull && campaign.status === 'upcoming' && (
+            {campaign.isJoined && campaign.status === 'upcoming' && (
+              <button
+                disabled
+                className="flex-1 px-6 py-3 bg-emerald-100 text-emerald-700 rounded-xl font-semibold cursor-default flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Sudah Bergabung
+              </button>
+            )}
+            {isFull && campaign.status === 'upcoming' && !campaign.isJoined && (
               <button
                 disabled
                 className="flex-1 px-6 py-3 bg-gray-300 text-gray-500 rounded-xl font-semibold cursor-not-allowed"

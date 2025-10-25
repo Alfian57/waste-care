@@ -8,9 +8,10 @@ interface CampaignCardProps {
   campaign: Campaign;
   onJoin: (campaignId: string) => void;
   onViewDetails: (campaign: Campaign) => void;
+  isJoining?: boolean;
 }
 
-export function CampaignCard({ campaign, onJoin, onViewDetails }: CampaignCardProps) {
+export function CampaignCard({ campaign, onJoin, onViewDetails, isJoining = false }: CampaignCardProps) {
   const isAlmostFull = campaign.participants >= campaign.maxParticipants * 0.8;
   const isFull = campaign.participants >= campaign.maxParticipants;
   const participationPercentage = (campaign.participants / campaign.maxParticipants) * 100;
@@ -27,10 +28,10 @@ export function CampaignCard({ campaign, onJoin, onViewDetails }: CampaignCardPr
   };
 
   const getStatusBadge = () => {
-    const badges = {
+    const badges: Record<Campaign['status'], { text: string; color: string }> = {
       upcoming: { text: 'Akan Datang', color: 'bg-blue-100 text-blue-800' },
       ongoing: { text: 'Sedang Berlangsung', color: 'bg-green-100 text-green-800' },
-      completed: { text: 'Selesai', color: 'bg-gray-100 text-gray-800' },
+      finished: { text: 'Selesai', color: 'bg-gray-100 text-gray-800' },
     };
     const badge = badges[campaign.status];
     return (
@@ -109,9 +110,11 @@ export function CampaignCard({ campaign, onJoin, onViewDetails }: CampaignCardPr
               {formatWasteType(type)}
             </span>
           ))}
-          <span className="px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-lg font-medium">
-            {campaign.estimatedVolume}
-          </span>
+          {campaign.estimatedVolume && (
+            <span className="px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-lg font-medium">
+              {campaign.estimatedVolume}
+            </span>
+          )}
         </div>
 
         {/* Participants Progress */}
@@ -140,15 +143,41 @@ export function CampaignCard({ campaign, onJoin, onViewDetails }: CampaignCardPr
           >
             Detail
           </button>
-          {campaign.status === 'upcoming' && !isFull && (
+          {campaign.status === 'upcoming' && !isFull && !campaign.isJoined && (
             <button
               onClick={() => onJoin(campaign.id)}
-              className="flex-1 px-4 py-2.5 bg-emerald-500 text-white rounded-xl font-semibold hover:bg-emerald-600 transition-colors"
+              disabled={isJoining}
+              className={`flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors ${
+                isJoining
+                  ? 'bg-emerald-400 text-white cursor-not-allowed'
+                  : 'bg-emerald-500 text-white hover:bg-emerald-600'
+              }`}
             >
-              Ikut Bergabung
+              {isJoining ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Memproses...
+                </span>
+              ) : (
+                'Ikut Bergabung'
+              )}
             </button>
           )}
-          {isFull && campaign.status === 'upcoming' && (
+          {campaign.isJoined && campaign.status === 'upcoming' && (
+            <button
+              disabled
+              className="flex-1 px-4 py-2.5 bg-emerald-100 text-emerald-700 rounded-xl font-semibold cursor-default flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Sudah Bergabung
+            </button>
+          )}
+          {isFull && campaign.status === 'upcoming' && !campaign.isJoined && (
             <button
               disabled
               className="flex-1 px-4 py-2.5 bg-gray-300 text-gray-500 rounded-xl font-semibold cursor-not-allowed"

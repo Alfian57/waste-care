@@ -1,4 +1,4 @@
-import { DetailItem } from '@/app/components';
+import { DetailItem } from '@/components';
 
 export default function PhotoInstructions() {
   return (

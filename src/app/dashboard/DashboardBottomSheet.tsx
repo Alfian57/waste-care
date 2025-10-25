@@ -1,4 +1,4 @@
-import { BottomSheet } from '@/app/components';
+import { BottomSheet } from '@/components';
 import type { WasteMarker } from '.';
 import { useRouter } from 'next/navigation';
 
@@ -36,6 +36,19 @@ export default function DashboardBottomSheet({
     router.push(`/revalidasi?${params.toString()}`);
   };
 
+  const handleCreateCampaignClick = () => {
+    if (!selectedMarker) return;
+    
+    // Navigate to campaign creation page with report data
+    const params = new URLSearchParams({
+      reportId: selectedMarker.id.toString(),
+      lat: selectedMarker.coordinates[1].toString(),
+      lng: selectedMarker.coordinates[0].toString(),
+    });
+    
+    router.push(`/buat-campaign?${params.toString()}`);
+  };
+
   return (
     <BottomSheet
       isOpen={true}
@@ -56,7 +69,9 @@ export default function DashboardBottomSheet({
         latitude: selectedMarker.coordinates[1],
         longitude: selectedMarker.coordinates[0]
       } : undefined}
+      hasCampaign={selectedMarker?.hasCampaign || false}
       onRevalidateClick={handleRevalidateClick}
+      onCreateCampaignClick={handleCreateCampaignClick}
     />
   );
 }

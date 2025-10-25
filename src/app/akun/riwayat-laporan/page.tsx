@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Toast } from '@/app/components';
+import { Toast } from '@/components';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 
@@ -25,10 +25,6 @@ export default function RiwayatLaporanPage() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
 
-  useEffect(() => {
-    fetchReports();
-  }, [user]);
-
   const fetchReports = async () => {
     if (!user) return;
 
@@ -42,7 +38,7 @@ export default function RiwayatLaporanPage() {
       if (error) throw error;
 
       setReports(data || []);
-    } catch (error: any) {
+    } catch (error) {
       setToast({
         message: 'Gagal memuat riwayat laporan',
         type: 'error'
@@ -51,6 +47,11 @@ export default function RiwayatLaporanPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchReports();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
