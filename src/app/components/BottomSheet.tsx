@@ -21,6 +21,8 @@ interface BottomSheetProps {
   reportId?: number;
   reportLocation?: { latitude: number; longitude: number };
   onRevalidateClick?: () => void;
+  hasCampaign?: boolean;
+  onCreateCampaignClick?: () => void;
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({
@@ -39,7 +41,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   onSearchClick,
   reportId,
   reportLocation,
-  onRevalidateClick
+  onRevalidateClick,
+  hasCampaign = false,
+  onCreateCampaignClick
 }) => {
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
 
@@ -211,8 +215,21 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                   />
                 )}
 
-                {/* Action Button */}
-                <div className="pt-2">
+                {/* Action Buttons */}
+                <div className="pt-2 space-y-3">
+                    {/* Create Campaign Button - Only show if no campaign exists */}
+                    {!hasCampaign && (
+                    <Button
+                      fullWidth
+                      variant="outline"
+                      className="border-2 border-[#16a34a] text-[#16a34a] hover:bg-[#15803d] hover:text-gray-500"
+                      onClick={onCreateCampaignClick}
+                    >
+                      Buat Campaign
+                    </Button>
+                    )}
+                  
+                  {/* Revalidate Button */}
                   <Button
                     fullWidth
                     className="bg-[#16a34a] hover:bg-[#15803d]"

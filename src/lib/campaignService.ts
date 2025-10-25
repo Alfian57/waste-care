@@ -138,6 +138,54 @@ export async function leaveCampaign(campaignId: number, userId: string): Promise
 }
 
 /**
+ * Check if a report has an associated campaign
+ */
+export async function checkReportHasCampaign(reportId: number): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('id')
+      .eq('report_id', reportId)
+      .limit(1);
+
+    if (error) throw error;
+
+    return data && data.length > 0;
+  } catch (error) {
+    console.error('Error checking report campaign:', error);
+    return false;
+  }
+}
+
+/**
+ * Get campaigns by report IDs
+ */
+export async function getCampaignsByReportIds(reportIds: number[]): Promise<Map<number, boolean>> {
+  try {
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('report_id')
+      .in('report_id', reportIds);
+
+    if (error) throw error;
+
+    const campaignMap = new Map<number, boolean>();
+    reportIds.forEach(id => campaignMap.set(id, false));
+    
+    if (data) {
+      data.forEach((campaign: { report_id: number }) => {
+        campaignMap.set(campaign.report_id, true);
+      });
+    }
+
+    return campaignMap;
+  } catch (error) {
+    console.error('Error fetching campaigns by report IDs:', error);
+    return new Map();
+  }
+}
+
+/**
  * Transform campaign row dari database ke Campaign interface
  */
 function transformCampaignRow(
