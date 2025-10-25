@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Toast } from '../../components';
+import { Button, Toast } from '@/components';
 import { useReport } from '@/contexts/ReportContext';
 import { usePhotoManagement } from './usePhotoManagement';
 import PhotoHeader from './PhotoHeader';

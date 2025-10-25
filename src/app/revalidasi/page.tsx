@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button, BottomNavigation, Toast } from '@/app/components';
+import { Button, BottomNavigation, Toast } from '@/components';
 import { useRevalidation } from '@/contexts/RevalidationContext';
 
 export default function RevalidasiGPSPage() {

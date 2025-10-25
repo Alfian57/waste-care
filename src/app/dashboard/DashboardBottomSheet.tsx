@@ -1,4 +1,4 @@
-import { BottomSheet } from '@/app/components';
+import { BottomSheet } from '@/components';
 import type { WasteMarker } from '.';
 import { useRouter } from 'next/navigation';
 
@@ -41,25 +41,17 @@ export default function DashboardBottomSheet({
     router.push(`/revalidasi?${params.toString()}`);
   };
 
-  const handleAddCampaignClick = () => {
+  const handleCreateCampaignClick = () => {
     if (!selectedMarker) return;
     
-    // Navigate to create campaign page with report data
+    // Navigate to campaign creation page with report data
     const params = new URLSearchParams({
       reportId: selectedMarker.id.toString(),
       lat: selectedMarker.coordinates[1].toString(),
       lng: selectedMarker.coordinates[0].toString(),
-      location: selectedMarker.location || selectedMarker.title
     });
     
-    router.push(`/dashboard/buat-campaign?${params.toString()}`);
-  };
-
-  const handleJoinCampaignClick = () => {
-    if (!campaignId) return;
-    
-    // Navigate to campaign detail page
-    router.push(`/campaign?campaignId=${campaignId}`);
+    router.push(`/buat-campaign?${params.toString()}`);
   };
 
   return (
@@ -82,11 +74,9 @@ export default function DashboardBottomSheet({
         latitude: selectedMarker.coordinates[1],
         longitude: selectedMarker.coordinates[0]
       } : undefined}
+      hasCampaign={selectedMarker?.hasCampaign || false}
       onRevalidateClick={handleRevalidateClick}
-      hasCampaign={hasCampaign}
-      campaignId={campaignId}
-      onAddCampaignClick={handleAddCampaignClick}
-      onJoinCampaignClick={handleJoinCampaignClick}
+      onCreateCampaignClick={handleCreateCampaignClick}
     />
   );
 }

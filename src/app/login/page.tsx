@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PWAInstallPrompt } from '../components';
+import { PWAInstallPrompt } from '@/components';
 import { useLogin } from './useLogin';
 import LoginFormContainer from './LoginFormContainer';
 

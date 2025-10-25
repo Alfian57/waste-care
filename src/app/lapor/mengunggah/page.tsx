@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useReport } from '@/contexts/ReportContext';
-import { Toast } from '@/app/components';
+import { Toast } from '@/components';
 import { validateReportData } from './validation';
 import { useUpload } from './useUpload';
 import UploadHeader from './UploadHeader';

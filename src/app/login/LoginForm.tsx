@@ -1,4 +1,4 @@
-import { Input, Checkbox, Button } from '@/app/components';
+import { Input, Checkbox, Button } from '@/components';
 import Link from 'next/link';
 
 interface LoginFormProps {
