@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { BottomNavigation } from '../components';
 import { CampaignCard } from '../components/CampaignCard';
 import { CampaignDetailModal } from '../components/CampaignDetailModal';
@@ -8,10 +9,22 @@ import { useCampaigns } from '@/hooks/useCampaigns';
 import type { Campaign } from '@/types/campaign.types';
 
 export default function CampaignPage() {
+  const searchParams = useSearchParams();
   const { campaigns, loading, error, joinCampaign } = useCampaigns();
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'completed'>('all');
   const [showJoinSuccess, setShowJoinSuccess] = useState(false);
+
+  // Check if there's a campaignId in URL params
+  useEffect(() => {
+    const campaignId = searchParams.get('campaignId');
+    if (campaignId && campaigns.length > 0) {
+      const campaign = campaigns.find(c => c.id === campaignId);
+      if (campaign) {
+        setSelectedCampaign(campaign);
+      }
+    }
+  }, [searchParams, campaigns]);
 
   const filteredCampaigns = filter === 'all' 
     ? campaigns 

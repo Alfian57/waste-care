@@ -67,6 +67,71 @@ export interface Database {
           longitude?: string
         }
       }
+      campaigns: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          location_name: string
+          latitude: number
+          longitude: number
+          date: string
+          time: string
+          max_participants: number
+          participants: number
+          status: 'upcoming' | 'ongoing' | 'completed'
+          image_url: string
+          organizer: string
+          organizer_type: 'personal' | 'organization'
+          waste_types: string[]
+          estimated_volume: string
+          report_ids: number[]
+          created_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          location_name: string
+          latitude: number
+          longitude: number
+          date: string
+          time: string
+          max_participants: number
+          participants?: number
+          status?: 'upcoming' | 'ongoing' | 'completed'
+          image_url: string
+          organizer: string
+          organizer_type: 'personal' | 'organization'
+          waste_types: string[]
+          estimated_volume: string
+          report_ids: number[]
+          created_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          location_name?: string
+          latitude?: number
+          longitude?: number
+          date?: string
+          time?: string
+          max_participants?: number
+          participants?: number
+          status?: 'upcoming' | 'ongoing' | 'completed'
+          image_url?: string
+          organizer?: string
+          organizer_type?: 'personal' | 'organization'
+          waste_types?: string[]
+          estimated_volume?: string
+          report_ids?: number[]
+          created_by?: string
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -78,6 +143,8 @@ export interface Database {
       location_category_enum: 'sungai' | 'pinggir_jalan' | 'area_public' | 'tanah_kosong' | 'lainnya'
       waste_type_enum: 'organik' | 'anorganik' | 'berbahaya' | 'campuran'
       waste_volume_enum: 'kurang_dari_1kg' | '1_5kg' | '6_10kg' | 'lebih_dari_10kg'
+      campaign_status_enum: 'upcoming' | 'ongoing' | 'completed'
+      organizer_type_enum: 'personal' | 'organization'
     }
   }
 }
