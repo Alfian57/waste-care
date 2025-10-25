@@ -74,6 +74,12 @@ export async function getNearbyReports(
       headers,
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Nearby reports request failed:', response.status, errorText);
+      throw new Error(`Failed to fetch nearby reports: ${response.statusText}`);
+    }
+
     const responseText = await response.text();
 
     let data: NearbyReportsResponse;
@@ -81,11 +87,8 @@ export async function getNearbyReports(
       data = JSON.parse(responseText);
     } catch (e) {
       console.error('Failed to parse response:', e);
+      console.error('Response text:', responseText.substring(0, 200));
       throw new Error(`Server returned invalid JSON: ${responseText.substring(0, 200)}`);
-    }
-
-    if (!response.ok) {
-      return data;
     }
 
     return data;

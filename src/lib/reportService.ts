@@ -93,10 +93,16 @@ export async function submitReport(params: SubmitReportParams): Promise<SubmitRe
     // Jika report berhasil dibuat, tambahkan EXP ke user
     if (data.success && session.user?.id) {
       try {
-        await addExpForCreateReport(session.user.id);
+        console.log('[REPORT] Report created successfully, adding EXP to user');
+        const expResult = await addExpForCreateReport(session.user.id);
+        if (expResult.success) {
+          console.log(`[REPORT] Successfully added ${expResult.newExp} EXP to user`);
+        } else {
+          console.error('[REPORT] Failed to add EXP:', expResult.error);
+        }
       } catch (expError) {
         // Log error tapi tidak gagalkan proses submit report
-        console.error('Failed to add EXP for report:', expError);
+        console.error('[REPORT] Exception while adding EXP for report:', expError);
       }
     }
 

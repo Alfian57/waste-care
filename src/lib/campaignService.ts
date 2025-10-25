@@ -113,10 +113,16 @@ export async function joinCampaign(campaignId: number, userId: string): Promise<
 
     // Jika berhasil join campaign, tambahkan EXP ke user
     try {
-      await addExpForJoinCampaign(userId);
+      console.log('[CAMPAIGN] User joined campaign successfully, adding EXP');
+      const expResult = await addExpForJoinCampaign(userId);
+      if (expResult.success) {
+        console.log(`[CAMPAIGN] Successfully added ${expResult.newExp} EXP to user`);
+      } else {
+        console.error('[CAMPAIGN] Failed to add EXP:', expResult.error);
+      }
     } catch (expError) {
       // Log error tapi tidak gagalkan proses join campaign
-      console.error('Failed to add EXP for joining campaign:', expError);
+      console.error('[CAMPAIGN] Exception while adding EXP for joining campaign:', expError);
     }
 
     return true;

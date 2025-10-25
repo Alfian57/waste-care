@@ -42,6 +42,14 @@ export interface Database {
           created_at?: string
           exp?: number
         }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       campaigns: {
         Row: {
