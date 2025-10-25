@@ -13,19 +13,16 @@ export interface Database {
         Row: {
           id: string
           email: string
-          username: string
           encrypted_password: string
         }
         Insert: {
           id?: string
           email: string
-          username: string
           encrypted_password: string
         }
         Update: {
           id?: string
           email?: string
-          username?: string
           encrypted_password?: string
         }
       }
