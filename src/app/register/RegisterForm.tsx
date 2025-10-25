@@ -1,4 +1,4 @@
-import { Input, Button, Checkbox } from '@/app/components';
+import { Input, Button, Checkbox } from '@/components';
 import SuccessMessage from './SuccessMessage';
 
 interface RegisterFormProps {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuthContext } from '@/components/AuthProvider';
+import { useAuthContext } from '@/components';
 
 /**
  * Hook untuk mengakses auth context

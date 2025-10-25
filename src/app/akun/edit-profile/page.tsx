@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Toast } from '@/app/components';
+import { Button, Toast } from '@/components';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 
@@ -77,9 +77,9 @@ export default function EditProfilePage() {
       setTimeout(() => {
         router.push('/akun');
       }, 1500);
-    } catch (error: any) {
+    } catch (error) {
       setToast({
-        message: error.message || 'Gagal memperbarui profile',
+        message: error instanceof Error ? error.message : 'Gagal memperbarui profile',
         type: 'error'
       });
     } finally {

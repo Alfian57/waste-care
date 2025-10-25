@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { PWAInstallPrompt } from '../components';
+import { PWAInstallPrompt } from '@/components';
 import { useLogin } from './useLogin';
 import LoginFormContainer from './LoginFormContainer';
 

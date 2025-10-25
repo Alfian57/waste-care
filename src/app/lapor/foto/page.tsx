@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button } from '../../components';
+import { Button } from '@/components';
 import { usePhotoNavigation } from './usePhotoNavigation';
 import PhotoStepHeader from './PhotoStepHeader';
 import PhotoInstructions from './PhotoInstructions';

@@ -1,4 +1,4 @@
-import { DetailItem } from '@/app/components';
+import { DetailItem } from '@/components';
 
 interface LocationInfoProps {
   locationEnabled: boolean;

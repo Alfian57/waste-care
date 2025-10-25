@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { AuthProvider } from "@/components/AuthProvider";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AuthProvider } from "@/components";
+import { ProtectedRoute } from "@/components";
 import { ReportProvider } from "@/contexts/ReportContext";
 import { RevalidationProvider } from "@/contexts/RevalidationContext";
 import "./globals.css";

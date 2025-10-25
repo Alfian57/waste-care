@@ -11,4 +11,5 @@ export interface WasteMarker {
   imageUrls: string[];
   notes?: string | null;
   createdAt: string;
+  hasCampaign?: boolean;
 }

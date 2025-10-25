@@ -1,4 +1,4 @@
-import { MapTilerMap } from '@/app/components';
+import { MapTilerMap } from '@/components';
 import UserLocationButton from './UserLocationButton';
 import CloseButton from './CloseButton';
 import type { WasteMarker } from '.';

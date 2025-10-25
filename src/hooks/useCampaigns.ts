@@ -1,24 +1,26 @@
 import { useState, useEffect } from 'react';
-import { getSampleCampaigns, generateCampaignFromNearbyReports } from '@/lib/campaignService';
+import { 
+  fetchCampaigns, 
+  joinCampaign as joinCampaignService, 
+  leaveCampaign as leaveCampaignService,
+  generateCampaignFromNearbyReports 
+} from '@/lib/campaignService';
 import type { Campaign, CampaignFilters } from '@/types/campaign.types';
+import { useAuth } from './useAuth';
 
 export function useCampaigns(filters?: CampaignFilters) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
-  useEffect(() => {
-    fetchCampaigns();
-  }, []);
-
-  const fetchCampaigns = async () => {
+  const fetchCampaignsData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // For now, use sample data
-      // In production, this would call a Supabase function
-      const data = getSampleCampaigns();
+      // Fetch dari Supabase
+      const data = await fetchCampaigns(user?.id);
       
       // Apply filters
       let filtered = data;
@@ -34,6 +36,11 @@ export function useCampaigns(filters?: CampaignFilters) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCampaignsData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const generateCampaign = async (latitude: number, longitude: number, radiusKm: number) => {
     try {
@@ -62,31 +69,67 @@ export function useCampaigns(filters?: CampaignFilters) {
     }
   };
 
-  const joinCampaign = (campaignId: string) => {
-    setCampaigns(prev =>
-      prev.map(c =>
-        c.id === campaignId
-          ? { ...c, participants: Math.min(c.participants + 1, c.maxParticipants) }
-          : c
-      )
-    );
+  const joinCampaign = async (campaignId: string) => {
+    if (!user) {
+      setError('Anda harus login terlebih dahulu');
+      return;
+    }
+
+    try {
+      await joinCampaignService(parseInt(campaignId), user.id);
+      
+      // Update local state
+      setCampaigns(prev =>
+        prev.map(c =>
+          c.id === campaignId
+            ? { 
+                ...c, 
+                participants: Math.min(c.participants + 1, c.maxParticipants),
+                isJoined: true 
+              }
+            : c
+        )
+      );
+    } catch (err) {
+      console.error('Error joining campaign:', err);
+      setError(err instanceof Error ? err.message : 'Gagal bergabung dengan campaign');
+      throw err;
+    }
   };
 
-  const leaveCampaign = (campaignId: string) => {
-    setCampaigns(prev =>
-      prev.map(c =>
-        c.id === campaignId
-          ? { ...c, participants: Math.max(c.participants - 1, 0) }
-          : c
-      )
-    );
+  const leaveCampaign = async (campaignId: string) => {
+    if (!user) {
+      setError('Anda harus login terlebih dahulu');
+      return;
+    }
+
+    try {
+      await leaveCampaignService(parseInt(campaignId), user.id);
+      
+      // Update local state
+      setCampaigns(prev =>
+        prev.map(c =>
+          c.id === campaignId
+            ? { 
+                ...c, 
+                participants: Math.max(c.participants - 1, 0),
+                isJoined: false 
+              }
+            : c
+        )
+      );
+    } catch (err) {
+      console.error('Error leaving campaign:', err);
+      setError(err instanceof Error ? err.message : 'Gagal keluar dari campaign');
+      throw err;
+    }
   };
 
   return {
     campaigns,
     loading,
     error,
-    refetch: fetchCampaigns,
+    refetch: fetchCampaignsData,
     generateCampaign,
     joinCampaign,
     leaveCampaign,

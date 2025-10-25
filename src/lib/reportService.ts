@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { addExpForCreateReport } from './expService';
 
 interface SubmitReportParams {
   imageBase64: string;
@@ -87,6 +88,16 @@ export async function submitReport(params: SubmitReportParams): Promise<SubmitRe
     
     if (!response.ok) {
       return data;
+    }
+
+    // Jika report berhasil dibuat, tambahkan EXP ke user
+    if (data.success && session.user?.id) {
+      try {
+        await addExpForCreateReport(session.user.id);
+      } catch (expError) {
+        // Log error tapi tidak gagalkan proses submit report
+        console.error('Failed to add EXP for report:', expError);
+      }
     }
 
     return data;

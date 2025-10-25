@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button } from '../../components';
+import { Button } from '@/components';
 import { useReport } from '@/contexts/ReportContext';
 import { useConfirmation } from './useConfirmation';
 import { getReportDisplayData } from './dataProcessor';

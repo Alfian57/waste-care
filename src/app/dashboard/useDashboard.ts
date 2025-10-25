@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNearbyReports } from './useNearbyReports';
 import { useMarkerSelection } from './useMarkerSelection';
@@ -8,6 +8,7 @@ import {
   formatLocationCategory,
   formatDistance,
 } from '@/lib/nearbyReportsService';
+import { getCampaignsByReportIds } from '@/lib/campaignService';
 import { useUserLocation } from './useUserLocation';
 import { WasteMarker } from '.';
 
@@ -15,6 +16,7 @@ export function useDashboard() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [radiusKm] = useState(5);
+  const [campaignMap, setCampaignMap] = useState<Map<number, boolean>>(new Map());
 
   // Get display name
   const getDisplayName = () => {
@@ -39,6 +41,14 @@ export function useDashboard() {
     onError: setError,
   });
 
+  // Fetch campaign status for reports
+  useEffect(() => {
+    if (reports.length > 0) {
+      const reportIds = reports.map(r => r.id);
+      getCampaignsByReportIds(reportIds).then(setCampaignMap);
+    }
+  }, [reports]);
+
   // Marker selection state
   const {
     selectedMarkerId,
@@ -62,8 +72,9 @@ export function useDashboard() {
       imageUrls: report.image_urls,
       notes: report.notes,
       createdAt: report.created_at,
+      hasCampaign: campaignMap.get(report.id) || false,
     }));
-  }, [reports]);
+  }, [reports, campaignMap]);
 
   // Search handler
   const handleSearch = useCallback(() => {
