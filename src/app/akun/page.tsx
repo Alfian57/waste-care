@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { BottomNavigation, Button } from '../components';
+import { BottomNavigation, Button } from '@/components';
 import { logout } from '@/lib/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { getUserExp, ensureProfileExists } from '@/lib/expService';

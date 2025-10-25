@@ -1,4 +1,4 @@
-import { GoogleButton } from '@/app/components';
+import { GoogleButton } from '@/components';
 import RegisterHeader from './RegisterHeader';
 import RegisterForm from './RegisterForm';
 import FormDivider from './FormDivider';

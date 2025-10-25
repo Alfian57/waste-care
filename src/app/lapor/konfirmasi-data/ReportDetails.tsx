@@ -1,4 +1,4 @@
-import { DetailItem } from '@/app/components';
+import { DetailItem } from '@/components';
 import { 
   WASTE_TYPE_LABELS, 
   WASTE_VOLUME_LABELS, 

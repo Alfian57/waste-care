@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BottomNavigation } from '../components';
+import { BottomNavigation } from '@/components';
 import { CampaignDetailModal } from './CampaignDetailModal';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import type { Campaign } from '@/types/campaign.types';

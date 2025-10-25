@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button, BottomNavigation, Toast } from '../components';
+import { Button, BottomNavigation, Toast } from '@/components';
 import { useReport } from '@/contexts/ReportContext';
 import { useLocation } from './useLocation';
 import LocationHeader from './LocationHeader';

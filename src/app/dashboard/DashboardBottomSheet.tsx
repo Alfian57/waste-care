@@ -1,4 +1,4 @@
-import { BottomSheet } from '@/app/components';
+import { BottomSheet } from '@/components';
 import type { WasteMarker } from '.';
 import { useRouter } from 'next/navigation';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BottomNavigation } from '../components';
+import { BottomNavigation } from '@/components';
 import { useDashboard } from './useDashboard';
 import LoadingOverlay from './LoadingOverlay';
 import ErrorNotification from './ErrorNotification';
