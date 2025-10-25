@@ -28,7 +28,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const pathname = usePathname();
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/register', '/auth/callback'];
+  const publicRoutes = ['/', '/login', '/register', '/auth/callback'];
   const isPublicRoute = publicRoutes.some(route => pathname?.startsWith(route));
 
   useEffect(() => {
