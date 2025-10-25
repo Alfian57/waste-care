@@ -8,5 +8,5 @@ export { default as MapTilerMap } from './MapTilerMap';
 export { default as BottomSheet } from './BottomSheet';
 export { default as DetailItem } from './DetailItem';
 export { default as Toast } from './Toast';
-export { CampaignCard } from './CampaignCard';
-export { CampaignDetailModal } from './CampaignDetailModal';
+export { CampaignCard } from '../campaign/CampaignCard';
+export { CampaignDetailModal } from '../campaign/CampaignDetailModal';

@@ -1,8 +1,8 @@
 'use client';
 
-import { formatWasteType } from '@/lib/nearbyReportsService';
-import { Campaign } from '@/types/campaign.types';
 import React from 'react';
+import type { Campaign } from '@/types/campaign.types';
+import { formatWasteType } from '@/lib/nearbyReportsService';
 
 interface CampaignDetailModalProps {
   campaign: Campaign | null;

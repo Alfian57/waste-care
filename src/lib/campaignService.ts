@@ -1,5 +1,6 @@
+import { supabase } from './supabase';
 import { getNearbyReports, type ReportLocation } from './nearbyReportsService';
-import type { Campaign } from '@/types/campaign.types';
+import type { Campaign, CampaignRow, CampaignWithParticipants } from '@/types/campaign.types';
 
 interface CreateCampaignParams {
   latitude: number;
@@ -7,134 +8,257 @@ interface CreateCampaignParams {
   radiusKm: number;
 }
 
-/**
- * Generate campaign dari nearby reports
- * Menggunakan edge function untuk mendapatkan laporan dalam radius tertentu
- */
-export async function generateCampaignFromNearbyReports(
-  params: CreateCampaignParams
-): Promise<Campaign | null> {
-  try {
-    const { latitude, longitude, radiusKm } = params;
+// Helper type untuk query result
+type CampaignQueryResult = CampaignRow & {
+  campaign_participants?: { profile_id: string }[];
+  reports?: {
+    id: number;
+    image_urls: string[];
+    waste_type: string;
+    waste_volume: string;
+    location_category: string;
+    lattitude: string;
+    longitude: string;
+  };
+};
 
-    // Fetch nearby reports using edge function
-    const result = await getNearbyReports({
-      latitude,
-      longitude,
-      radiusKm,
-      limit: 100,
+/**
+ * Fetch all campaigns dari Supabase
+ */
+export async function fetchCampaigns(userId?: string): Promise<Campaign[]> {
+  try {
+    // Query campaigns dengan participant count dan report data
+    const { data: campaigns, error } = await supabase
+      .from('campaigns')
+      .select(`
+        *,
+        campaign_participants(profile_id),
+        reports(
+          id,
+          image_urls,
+          waste_type,
+          waste_volume,
+          location_category,
+          lattitude,
+          longitude
+        )
+      `)
+      .order('start_time', { ascending: true });
+
+    if (error) throw error;
+
+    if (!campaigns) return [];
+
+    // Transform data dari database ke Campaign interface
+    const transformedCampaigns: Campaign[] = campaigns.map((campaign: CampaignQueryResult) => {
+      const participantCount = campaign.campaign_participants?.length || 0;
+      const isJoined = userId 
+        ? campaign.campaign_participants?.some((p: { profile_id: string }) => p.profile_id === userId)
+        : false;
+
+      return transformCampaignRow(campaign, participantCount, isJoined);
     });
 
-    if (!result.success || !result.data || result.data.reports.length === 0) {
-      return null;
-    }
-
-    const reports = result.data.reports;
-    
-    // Group reports untuk membuat campaign
-    const wasteTypes = Array.from(new Set(reports.map(r => r.waste_type)));
-    const totalReports = reports.length;
-    
-    // Hitung estimasi volume total
-    const estimatedVolume = calculateTotalVolume(reports);
-    
-    // Generate campaign location (center point atau lokasi dengan sampah terbanyak)
-    const centerLocation = calculateCenterLocation(reports);
-    
-    // Create campaign object
-    const campaign: Campaign = {
-      id: `campaign-${Date.now()}`,
-      title: `Gotong Royong Bersih-Bersih ${centerLocation.name}`,
-      description: `Mari bergabung dalam aksi bersih-bersih bersama! Terdapat ${totalReports} titik sampah dalam radius ${radiusKm} km yang perlu dibersihkan.`,
-      location: {
-        name: centerLocation.name,
-        coordinates: [longitude, latitude],
-      },
-      date: getNextWeekendDate(),
-      time: '08:00 - 12:00',
-      participants: 0,
-      maxParticipants: Math.max(10, totalReports * 2),
-      status: 'upcoming',
-      imageUrl: reports[0]?.image_urls[0] || '/images/campaign-placeholder.png',
-      organizer: 'WasteCare Community',
-      wasteTypes: wasteTypes,
-      estimatedVolume: estimatedVolume,
-      reportIds: reports.map(r => r.id),
-    };
-
-    return campaign;
+    return transformedCampaigns;
   } catch (error) {
-    console.error('Error generating campaign:', error);
-    return null;
+    console.error('Error fetching campaigns:', error);
+    throw new Error('Gagal memuat data campaign');
   }
 }
 
 /**
- * Get sample campaigns (mock data untuk development)
+ * Join campaign
  */
-export function getSampleCampaigns(): Campaign[] {
-  return [
-    {
-      id: '1',
-      title: 'Bersih-Bersih Kali Code',
-      description: 'Mari bersama-sama membersihkan Kali Code dari sampah plastik dan organik. Aksi nyata untuk lingkungan yang lebih bersih!',
-      location: {
-        name: 'Kali Code, Sleman',
-        coordinates: [110.3695, -7.7756],
-      },
-      date: '2025-10-26',
-      time: '08:00 - 12:00',
-      participants: 23,
-      maxParticipants: 50,
-      status: 'upcoming',
-      imageUrl: '/images/campaign-placeholder.png',
-      organizer: 'WasteCare Yogyakarta',
-      wasteTypes: ['plastik', 'organik'],
-      estimatedVolume: '50-100kg',
-      reportIds: [1, 2, 3],
-    },
-    {
-      id: '2',
-      title: 'Gotong Royong Malioboro',
-      description: 'Aksi bersih-bersih di kawasan Malioboro untuk menjaga kebersihan destinasi wisata kita.',
-      location: {
-        name: 'Jalan Malioboro',
-        coordinates: [110.3656, -7.7928],
-      },
-      date: '2025-10-27',
-      time: '06:00 - 10:00',
-      participants: 45,
-      maxParticipants: 60,
-      status: 'upcoming',
-      imageUrl: '/images/campaign-placeholder.png',
-      organizer: 'Pemuda Peduli Jogja',
-      wasteTypes: ['campuran'],
-      estimatedVolume: '30-50kg',
-      reportIds: [4, 5],
-    },
-    {
-      id: '3',
-      title: 'Bersih Pantai Parangtritis',
-      description: 'Selamatkan pantai dari sampah plastik! Mari berkontribusi untuk kelestarian pesisir.',
-      location: {
-        name: 'Pantai Parangtritis',
-        coordinates: [110.3275, -8.0250],
-      },
-      date: '2025-11-02',
-      time: '07:00 - 11:00',
-      participants: 12,
-      maxParticipants: 40,
-      status: 'upcoming',
-      imageUrl: '/images/campaign-placeholder.png',
-      organizer: 'Save Our Beach',
-      wasteTypes: ['plastik', 'anorganik'],
-      estimatedVolume: 'Lebih dari 100kg',
-      reportIds: [6, 7, 8, 9],
-    },
-  ];
+export async function joinCampaign(campaignId: number, userId: string): Promise<boolean> {
+  try {
+    // Check apakah sudah join
+    const { data: existing } = await supabase
+      .from('campaign_participants')
+      .select('*')
+      .eq('campaign_id', campaignId)
+      .eq('profile_id', userId)
+      .single();
+
+    if (existing) {
+      throw new Error('Anda sudah bergabung dengan campaign ini');
+    }
+
+    // Check apakah campaign sudah penuh
+    const { data: campaign } = await supabase
+      .from('campaigns')
+      .select('max_participants, campaign_participants(profile_id)')
+      .eq('id', campaignId)
+      .single();
+
+    if (campaign) {
+      const campaignData = campaign as unknown as CampaignQueryResult;
+      const participantCount = campaignData.campaign_participants?.length || 0;
+      if (participantCount >= campaignData.max_participants) {
+        throw new Error('Campaign sudah penuh');
+      }
+    }
+
+    // Insert participant
+    const insertData = {
+      campaign_id: campaignId,
+      profile_id: userId,
+    };
+    
+    const { error } = await supabase
+      .from('campaign_participants')
+      .insert(insertData as never);
+
+    if (error) throw error;
+
+    return true;
+  } catch (error) {
+    console.error('Error joining campaign:', error);
+    throw error;
+  }
 }
 
-// Helper functions
+/**
+ * Leave campaign
+ */
+export async function leaveCampaign(campaignId: number, userId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('campaign_participants')
+      .delete()
+      .eq('campaign_id', campaignId)
+      .eq('profile_id', userId);
+
+    if (error) throw error;
+
+    return true;
+  } catch (error) {
+    console.error('Error leaving campaign:', error);
+    throw error;
+  }
+}
+
+/**
+ * Transform campaign row dari database ke Campaign interface
+ */
+function transformCampaignRow(
+  row: CampaignQueryResult,
+  participantCount: number = 0,
+  isJoined: boolean = false
+): Campaign {
+  const startTime = new Date(row.start_time);
+  const endTime = new Date(row.end_time);
+
+  // Format date dan time
+  const date = startTime.toISOString().split('T')[0];
+  const timeStart = startTime.toLocaleTimeString('id-ID', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: false 
+  });
+  const timeEnd = endTime.toLocaleTimeString('id-ID', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: false 
+  });
+  const time = `${timeStart} - ${timeEnd}`;
+
+  // Get location from report
+  const locationName = row.reports 
+    ? getLocationName(row.reports.location_category)
+    : 'Lokasi tidak tersedia';
+
+  // Get coordinates from report
+  const coordinates: [number, number] | undefined = row.reports 
+    ? [parseFloat(row.reports.longitude), parseFloat(row.reports.lattitude)]
+    : undefined;
+
+  // Get image from report
+  const imageUrl = row.reports?.image_urls?.[0] || '/images/campaign-placeholder.png';
+
+  // Get waste types from report
+  const wasteTypes = row.reports ? [row.reports.waste_type] : [];
+
+  // Get estimated volume from report
+  const estimatedVolume = row.reports ? formatWasteVolume(row.reports.waste_volume) : undefined;
+
+  return {
+    id: row.id.toString(),
+    title: row.title,
+    description: row.description,
+    location: {
+      name: locationName,
+      coordinates,
+    },
+    date,
+    time,
+    participants: participantCount,
+    maxParticipants: row.max_participants,
+    status: row.status,
+    imageUrl,
+    organizer: row.organizer_name,
+    wasteTypes,
+    estimatedVolume,
+    reportIds: row.reports ? [row.reports.id] : undefined,
+    isJoined,
+  };
+}
+
+// Helper function untuk format location name
+function getLocationName(locationCategory: string): string {
+  const locationNames: Record<string, string> = {
+    'sungai': 'Sungai',
+    'pinggir_jalan': 'Pinggir Jalan',
+    'area_publik': 'Area Publik',
+    'tanah_kosong': 'Tanah Kosong',
+    'lainnya': 'Lainnya',
+  };
+  return locationNames[locationCategory] || locationCategory;
+}
+
+// Helper function untuk format waste volume
+function formatWasteVolume(volume: string): string {
+  const volumeLabels: Record<string, string> = {
+    'kurang_dari_1kg': 'Kurang dari 1kg',
+    '1_5kg': '1-5kg',
+    '6_10kg': '6-10kg',
+    'lebih_dari_10kg': 'Lebih dari 10kg',
+  };
+  return volumeLabels[volume] || volume;
+}
+
+/**
+ * Generate campaign dari nearby reports
+ * NOTE: Function ini di-comment karena schema baru mengharuskan campaign
+ * terkait dengan satu report_id, bukan multiple reports.
+ * Perlu disesuaikan dengan flow baru untuk create campaign.
+ */
+export async function generateCampaignFromNearbyReports(
+  params: CreateCampaignParams
+): Promise<Campaign | null> {
+  console.warn('generateCampaignFromNearbyReports is deprecated with new schema');
+  return null;
+  
+  // try {
+  //   const { latitude, longitude, radiusKm } = params;
+  //   // Implementation needs to be updated for new schema
+  // } catch (error) {
+  //   console.error('Error generating campaign:', error);
+  //   return null;
+  // }
+}
+
+/**
+ * Get sample campaigns (mock data untuk development)
+ * NOTE: Sample data ini tidak sesuai dengan schema baru.
+ * Gunakan data dari database.
+ */
+export function getSampleCampaigns(): Campaign[] {
+  console.warn('getSampleCampaigns is deprecated, use fetchCampaigns instead');
+  return [];
+}
+
+// Deprecated helper functions - kept for backward compatibility
+// These will be removed in future versions
 
 function calculateTotalVolume(reports: ReportLocation[]): string {
   const volumeMap: Record<string, number> = {
@@ -155,8 +279,6 @@ function calculateTotalVolume(reports: ReportLocation[]): string {
 }
 
 function calculateCenterLocation(reports: ReportLocation[]): { name: string } {
-  // Simplified: use first report location name
-  // Could be enhanced with actual geocoding
   const categories = reports.map(r => r.location_category);
   const mostCommon = categories.sort((a, b) =>
     categories.filter(c => c === a).length - categories.filter(c => c === b).length
