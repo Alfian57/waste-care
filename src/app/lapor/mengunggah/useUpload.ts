@@ -31,12 +31,14 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
       }, 100);
 
       // Upload first photo - let AI generate waste type, volume, and location category
-      const result = await submitReport({
+      const submitParams = {
         imageBase64: reportData.photos[0],
-        latitude: reportData.location.latitude.toString(),
-        longitude: reportData.location.longitude.toString(),
-        notes: reportData.notes,
-      });
+        latitude: Number(reportData.location.latitude),
+        longitude: Number(reportData.location.longitude),
+        notes: reportData.notes || '',
+      };
+
+      const result = await submitReport(submitParams);
 
       clearInterval(progressInterval);
 

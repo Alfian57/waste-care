@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Location } from '@/contexts/ReportContext';
+import { getGeolocationErrorMessage } from '@/utils/errorMessages';
 
 interface UseLocationProps {
   currentLocation: Location | null;
@@ -38,20 +39,8 @@ export function useLocation({ currentLocation, onSetLocation }: UseLocationProps
       },
       (error) => {
         setLoading(false);
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setLocationError('Izin lokasi ditolak. Mohon izinkan akses lokasi di pengaturan browser.');
-            break;
-          case error.POSITION_UNAVAILABLE:
-            setLocationError('Informasi lokasi tidak tersedia');
-            break;
-          case error.TIMEOUT:
-            setLocationError('Permintaan lokasi timeout');
-            break;
-          default:
-            setLocationError('Terjadi kesalahan saat mendapatkan lokasi');
-            break;
-        }
+        const errorMessage = getGeolocationErrorMessage(error);
+        setLocationError(errorMessage);
       },
       {
         enableHighAccuracy: true,

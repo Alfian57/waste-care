@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button, BottomNavigation, Toast } from '@/components';
+import { Button, BottomNavigation, Toast, PermissionGuard } from '@/components';
 import { useRevalidation } from '@/contexts/RevalidationContext';
+import { useGeolocationPermission } from '@/hooks/usePermission';
 
 export default function RevalidasiGPSPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function RevalidasiGPSPage() {
   const [loading, setLoading] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const { permissionState, recheckPermission } = useGeolocationPermission();
 
   useEffect(() => {
     if (reportId) {
@@ -114,7 +116,12 @@ export default function RevalidasiGPSPage() {
       </div>
 
       <div className="flex-1 flex flex-col justify-center px-6 py-8">
-        <div className="text-center mb-8">
+        <PermissionGuard 
+          type="location" 
+          permissionState={permissionState}
+          onRetry={recheckPermission}
+        >
+          <div className="text-center mb-8">
           <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-12 h-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -178,6 +185,7 @@ export default function RevalidasiGPSPage() {
             </Button>
           )}
         </div>
+        </PermissionGuard>
       </div>
 
       <div className="p-6">

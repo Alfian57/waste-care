@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Toast } from '@/components';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
+import { getErrorMessage } from '@/utils/errorMessages';
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -30,60 +31,141 @@ export default function EditProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation checks before setting loading
+    if (formData.newPassword) {
+      if (formData.newPassword !== formData.confirmPassword) {
+        setToast({
+          message: 'Password baru tidak cocok',
+          type: 'error'
+        });
+        return;
+      }
+
+      if (formData.newPassword.length < 6) {
+        setToast({
+          message: 'Password minimal 6 karakter',
+          type: 'error'
+        });
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
+      let hasChanges = false;
+
       // Update name if changed
       if (formData.fullName !== user?.user_metadata?.full_name) {
         const { error: updateError } = await supabase.auth.updateUser({
           data: { full_name: formData.fullName }
         });
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error('Name update error:', updateError);
+          throw updateError;
+        }
+        hasChanges = true;
       }
 
       // Update password if provided
       if (formData.newPassword) {
-        if (formData.newPassword !== formData.confirmPassword) {
-          setToast({
-            message: 'Password baru tidak cocok',
-            type: 'error'
-          });
-          setLoading(false);
-          return;
+        // Get session token for direct API call
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.access_token) {
+          throw new Error('No active session');
         }
 
-        if (formData.newPassword.length < 6) {
-          setToast({
-            message: 'Password minimal 6 karakter',
-            type: 'error'
-          });
-          setLoading(false);
-          return;
+        // Direct API call to Supabase Auth with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`,
+            {
+              method: 'PUT',
+              headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json',
+                'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+              },
+              body: JSON.stringify({
+                password: formData.newPassword
+              }),
+              signal: controller.signal
+            }
+          );
+
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Password update error:', errorData);
+            
+            if (response.status === 422) {
+              setToast({
+                message: 'Password baru harus berbeda dengan password lama',
+                type: 'error'
+              });
+              setLoading(false);
+              return;
+            }
+            
+            throw new Error(errorData.message || 'Failed to update password');
+          }
+
+          const data = await response.json();
+          hasChanges = true;
+        } catch (err: any) {
+          clearTimeout(timeoutId);
+          if (err.name === 'AbortError') {
+            console.error('Password update timed out');
+            throw new Error('Request timeout. Silakan coba lagi.');
+          }
+          throw err;
         }
-
-        const { error: passwordError } = await supabase.auth.updateUser({
-          password: formData.newPassword
-        });
-
-        if (passwordError) throw passwordError;
       }
 
+      // Check if any changes were made
+      if (!hasChanges) {
+        setToast({
+          message: 'Tidak ada perubahan yang dilakukan',
+          type: 'warning'
+        });
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      
       setToast({
         message: 'Profile berhasil diperbarui',
         type: 'success'
       });
 
+      // Reset password fields
+      setFormData(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
+
+      // Redirect after showing success message
       setTimeout(() => {
         router.push('/akun');
       }, 1500);
     } catch (error) {
+      console.error('Error updating profile:', error);
+      setLoading(false);
+      const errorMessage = getErrorMessage(error);
       setToast({
-        message: error instanceof Error ? error.message : 'Gagal memperbarui profile',
+        message: errorMessage,
         type: 'error'
       });
-    } finally {
-      setLoading(false);
     }
   };
 

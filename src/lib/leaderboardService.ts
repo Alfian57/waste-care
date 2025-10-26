@@ -72,19 +72,29 @@ export const leaderboardService = {
         console.warn('Failed to fetch user emails, using fallback:', error);
       }
 
-      // Map to leaderboard entries with censored emails
-      const leaderboard: LeaderboardEntry[] = profiles.map((profile, index) => {
+      // Map to leaderboard entries with proper ranking (handles ties)
+      const leaderboard: LeaderboardEntry[] = [];
+      let currentRank = 1;
+      
+      for (let i = 0; i < profiles.length; i++) {
+        const profile = profiles[i];
+        
+        // If not the first entry and EXP is different from previous, update rank
+        if (i > 0 && profiles[i - 1].exp !== profile.exp) {
+          currentRank = i + 1;
+        }
+        
         const email = emailMap.get(profile.id);
         const displayName = email ? censorEmail(email) : `User ${profile.id.slice(0, 8)}`;
         
-        return {
+        leaderboard.push({
           id: profile.id,
           exp: profile.exp,
-          rank: index + 1,
+          rank: currentRank,
           displayName,
           email: email ? censorEmail(email) : undefined
-        };
-      });
+        });
+      }
 
       return leaderboard;
     } catch (error) {
@@ -99,23 +109,32 @@ export const leaderboardService = {
    */
   async getUserRank(userId: string): Promise<{ rank: number; exp: number; total: number } | null> {
     try {
-      // Get user's exp
+      // Get user's exp and created_at
       const { data: userProfile, error: userError } = await supabase
         .from('profiles')
-        .select('exp')
+        .select('exp, created_at')
         .eq('id', userId)
-        .single<{ exp: number }>();
+        .single<{ exp: number; created_at: string }>();
 
       if (userError) throw userError;
       if (!userProfile) return null;
 
       // Count users with higher exp
-      const { count: higherCount, error: countError } = await supabase
+      const { count: higherExpCount, error: higherExpError } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
         .gt('exp', userProfile.exp);
 
-      if (countError) throw countError;
+      if (higherExpError) throw higherExpError;
+
+      // Count users with same exp but earlier created_at (for tie-breaking)
+      const { count: sameExpEarlierCount, error: sameExpError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('exp', userProfile.exp)
+        .lt('created_at', userProfile.created_at);
+
+      if (sameExpError) throw sameExpError;
 
       // Get total users count
       const { count: totalCount, error: totalError } = await supabase
@@ -124,8 +143,11 @@ export const leaderboardService = {
 
       if (totalError) throw totalError;
 
+      // Rank = users with higher exp + users with same exp but earlier created_at + 1
+      const rank = (higherExpCount || 0) + (sameExpEarlierCount || 0) + 1;
+
       return {
-        rank: (higherCount || 0) + 1,
+        rank,
         exp: userProfile.exp,
         total: totalCount || 0
       };

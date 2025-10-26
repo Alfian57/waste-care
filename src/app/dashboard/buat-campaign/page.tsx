@@ -96,8 +96,6 @@ export default function BuatCampaignPage() {
         createdBy: user?.id
       };
 
-      console.log('Campaign Data:', campaignData);
-
       setToast({
         message: 'Campaign berhasil dibuat!',
         type: 'success'

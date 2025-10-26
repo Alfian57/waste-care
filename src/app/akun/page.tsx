@@ -6,7 +6,6 @@ import { BottomNavigation, Button } from '@/components';
 import { logout } from '@/lib/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { getUserExp, ensureProfileExists } from '@/lib/expService';
-import '@/lib/testExpService'; // Import test function for debugging
 
 export default function AkunPage() {
   const router = useRouter();

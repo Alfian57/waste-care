@@ -32,8 +32,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
   try {
     const { userId, amount, action } = params;
 
-    console.log(`[EXP] Adding ${amount} EXP to user ${userId} for action: ${action}`);
-
     // Try using RPC function first (if available in Supabase)
     try {
       const { data: rpcResult, error: rpcError } = await supabase
@@ -47,16 +45,14 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
       if (!rpcError && rpcResult && Array.isArray(rpcResult) && rpcResult.length > 0) {
         // @ts-expect-error - Dynamic RPC result
         const newExp = rpcResult[0].new_exp;
-        console.log(`[EXP] Successfully updated exp to ${newExp} via RPC`);
         return {
           success: true,
           newExp,
         };
       }
       
-      console.log('[EXP] RPC function not available, using fallback method');
     } catch (rpcError) {
-      console.log('[EXP] RPC function error, using fallback method:', rpcError);
+      // Log RPC error but fallback to manual update
     }
 
     // Fallback: Manual update
@@ -103,8 +99,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
     const currentExp = profile?.exp || 0;
     const newExp = currentExp + amount;
 
-    console.log(`[EXP] Updating exp from ${currentExp} to ${newExp}`);
-
     // Verify we're updating the correct user (auth.uid() should match userId)
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user?.id) {
@@ -123,12 +117,8 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
       };
     }
 
-    console.log('[EXP] Session verified, user ID:', session.user.id);
-
     // Update exp using the session user's ID
     const profileUpdate: ProfileUpdate = { exp: newExp };
-    console.log('[EXP] Attempting update with data:', profileUpdate);
-    console.log('[EXP] Update condition: id =', session.user.id);
     
     const { data: updateResult, error: updateError } = await supabase
       .from('profiles')
@@ -136,8 +126,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
       .update(profileUpdate)
       .eq('id', session.user.id)  // Use session user ID instead
       .select();
-
-    console.log('[EXP] Update result:', { updateResult, updateError });
 
     if (updateError) {
       console.error('[EXP] Error updating user exp:', updateError);
@@ -161,7 +149,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
       };
     }
 
-    console.log(`[EXP] Successfully updated exp to ${newExp}`);
     return {
       success: true,
       newExp,
@@ -250,7 +237,6 @@ export async function getUserExp(userId: string): Promise<number> {
 
     // If no profile exists, return 0
     if (!data) {
-      console.log('[EXP] No profile found for user, returning 0');
       return 0;
     }
 
@@ -268,8 +254,6 @@ export async function getUserExp(userId: string): Promise<number> {
  */
 export async function ensureProfileExists(userId: string): Promise<boolean> {
   try {
-    console.log(`[EXP] Ensuring profile exists for user: ${userId}`);
-    
     // Get session to verify user
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user?.id) {
@@ -297,12 +281,10 @@ export async function ensureProfileExists(userId: string): Promise<boolean> {
 
     // If profile exists, return true
     if (data) {
-      console.log(`[EXP] Profile already exists for user: ${userId}`);
       return true;
     }
 
     // Create new profile using session user ID
-    console.log(`[EXP] Creating new profile for user: ${userId}`);
     const newProfile: ProfileInsert = { id: session.user.id, exp: 0 };
     const { error: insertError } = await supabase
       .from('profiles')
@@ -312,14 +294,12 @@ export async function ensureProfileExists(userId: string): Promise<boolean> {
     if (insertError) {
       // Check if error is due to duplicate key (profile was created by another request)
       if (insertError.code === '23505') {
-        console.log('[EXP] Profile already exists (created by concurrent request)');
         return true;
       }
       console.error('[EXP] Error creating profile:', insertError);
       return false;
     }
 
-    console.log(`[EXP] Successfully created profile for user: ${userId}`);
     return true;
   } catch (error) {
     console.error('[EXP] Error in ensureProfileExists:', error);

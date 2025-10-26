@@ -1,8 +1,18 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { Database } from '@/types/database.types';
 
-type Report = Database['public']['Tables']['reports']['Row'];
+interface ReportWithCoordinates {
+  id: number;
+  user_id: string;
+  image_urls: string[];
+  created_at: string;
+  waste_type: string;
+  waste_volume: string;
+  location_category: string;
+  notes: string | null;
+  latitude: number;
+  longitude: number;
+}
 
 export interface WasteMarker {
   id: string;
@@ -32,19 +42,18 @@ export function useReports() {
       setLoading(true);
       setError(null);
 
+      // Use RPC function to get reports with extracted coordinates
       const { data, error: fetchError } = await supabase
-        .from('reports')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .rpc('get_reports_with_coordinates');
 
       if (fetchError) {
         throw fetchError;
       }
 
       // Transform Supabase data to WasteMarker format
-      const markers: WasteMarker[] = (data || []).map((report: Report) => ({
+      const markers: WasteMarker[] = (data as ReportWithCoordinates[] || []).map((report: ReportWithCoordinates) => ({
         id: report.id.toString(),
-        coordinates: [parseFloat(report.longitude), parseFloat(report.lattitude)] as [number, number],
+        coordinates: [report.longitude, report.latitude] as [number, number],
         type: 'waste' as const,
         title: getWasteTypeLabel(report.waste_type),
         location: getCategoryLabel(report.location_category),
