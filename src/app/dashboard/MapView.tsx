@@ -1,6 +1,5 @@
-import { MapTilerMap, MapPermissionTip } from '@/components';
-import { useState, useCallback } from 'react';
-import UserLocationButton from './UserLocationButton';
+import { MapTilerMap } from '@/components';
+import { useCallback } from 'react';
 import CloseButton from './CloseButton';
 import type { WasteMarker } from '.';
 
@@ -19,20 +18,12 @@ export default function MapView({
   onMarkerClick,
   onCloseDetails,
 }: MapViewProps) {
-  const [showPermissionTip, setShowPermissionTip] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
-
   const handleMapReady = useCallback(() => {
-    // Map is ready, check if we should show permission tip
-    if (!userLocation) {
-      // Show tip after a short delay
-      setTimeout(() => setShowPermissionTip(true), 2000);
-    }
-  }, [userLocation]);
+    // Map is ready
+  }, []);
 
   const handleMapError = useCallback((error: Error) => {
     console.error('Map error:', error);
-    setMapError(error.message);
   }, []);
 
   return (
@@ -43,19 +34,9 @@ export default function MapView({
         zoom={13}
         markers={markers}
         onMarkerClick={onMarkerClick}
-        showUserLocation={!!userLocation}
         onMapReady={handleMapReady}
         onMapError={handleMapError}
       />
-      
-      {/* Permission Tip */}
-      <MapPermissionTip 
-        show={showPermissionTip && !showDetails && !mapError}
-        onDismiss={() => setShowPermissionTip(false)}
-      />
-
-      {/* Map Overlay - User Location Indicator */}
-      {!showDetails && <UserLocationButton />}
 
       {/* Close button for selected marker */}
       {showDetails && <CloseButton onClick={onCloseDetails} />}

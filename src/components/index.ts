@@ -13,7 +13,6 @@ export { default as DetailItem } from './shared/DetailItem';
 export { default as PWAInstallPrompt } from './shared/PWAInstallPrompt';
 export { PermissionGuard } from './shared/PermissionGuard';
 export { PhotoCapture } from './shared/PhotoCapture';
-export { MapPermissionTip } from './shared/MapPermissionTip';
 
 // Providers
 export { AuthProvider, useAuthContext } from './providers/AuthProvider';
