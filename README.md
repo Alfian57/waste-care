@@ -105,7 +105,7 @@ WasteCare adalah aplikasi Progressive Web App (PWA) untuk manajemen sampah cerda
 ### Development Tools
 - **Linter**: ESLint 9.x
 - **Package Manager**: npm/yarn/bun
-- **Build Tool**: Turbopack (Next.js 15)
+- **Build Tool**: Turbopack (Next.JS 15)
 
 ## 📦 Requirements
 
