@@ -111,6 +111,21 @@ export default function StatisticsSection() {
                     </div>
                   </div>
                 ))
+              ) : topCities.length === 0 ? (
+                // Empty state
+                <div className="bg-white rounded-xl p-12 shadow-sm text-center">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                    Belum Ada Data Kota
+                  </h4>
+                  <p className="text-gray-600 max-w-md mx-auto">
+                    Data statistik kota akan muncul setelah ada laporan sampah dan campaign yang diselesaikan di berbagai kota.
+                  </p>
+                </div>
               ) : (
                 topCities.map((city) => (
                   <div
@@ -247,9 +262,9 @@ export default function StatisticsSection() {
               <div>
                 <h4 className="font-semibold text-yellow-900 mb-1">Cara Perhitungan Skor</h4>
                 <p className="text-sm text-yellow-800">
-                  Skor dihitung berdasarkan jumlah campaign yang diselesaikan, tingkat partisipasi masyarakat, 
-                  kecepatan penanganan laporan, dan area yang berhasil dibersihkan. Data diperbarui setiap hari 
-                  untuk memberikan informasi terkini.
+                  Skor dihitung berdasarkan jumlah campaign yang diselesaikan (60%), jumlah laporan yang ditangani (30%), 
+                  dan campaign aktif (10%). Kota ditentukan berdasarkan koordinat geografis laporan. 
+                  Data diperbarui secara real-time berdasarkan aktivitas di database.
                 </p>
               </div>
             </div>
