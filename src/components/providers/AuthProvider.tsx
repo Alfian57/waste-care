@@ -41,7 +41,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         // Ensure profile exists when user is authenticated
         if (session?.user) {
-          console.log('[AUTH] User authenticated, ensuring profile exists');
           await ensureProfileExists(session.user.id);
         }
         
@@ -65,13 +64,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('[AUTH] Auth state changed:', event);
         setUser(session?.user ?? null);
         setLoading(false);
 
         // Ensure profile exists when user signs in
         if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
-          console.log('[AUTH] User signed in/updated, ensuring profile exists');
           await ensureProfileExists(session.user.id);
         }
 

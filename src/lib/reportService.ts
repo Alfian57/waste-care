@@ -41,15 +41,6 @@ interface SubmitReportResponse {
 
 export async function submitReport(params: SubmitReportParams): Promise<SubmitReportResponse> {
   try {
-    console.log('[REPORT SERVICE] Input params:', {
-      hasImage: !!params.imageBase64,
-      imageLength: params.imageBase64?.length,
-      latitude: params.latitude,
-      latitudeType: typeof params.latitude,
-      longitude: params.longitude,
-      longitudeType: typeof params.longitude,
-      notes: params.notes
-    });
 
     // Get the session token
     const { data: { session } } = await supabase.auth.getSession();
@@ -73,11 +64,6 @@ export async function submitReport(params: SubmitReportParams): Promise<SubmitRe
       ...(params.wasteVolume && { waste_volume: params.wasteVolume }),
       ...(params.locationCategory && { location_category: params.locationCategory }),
     };
-
-    console.log('[REPORT SERVICE] Request body:', {
-      ...requestBody,
-      image_base64: requestBody.image_base64 ? `${requestBody.image_base64.substring(0, 50)}...` : 'missing'
-    });
 
     // Call the edge function
     const response = await fetch(
@@ -110,10 +96,8 @@ export async function submitReport(params: SubmitReportParams): Promise<SubmitRe
     // Jika report berhasil dibuat, tambahkan EXP ke user
     if (data.success && session.user?.id) {
       try {
-        console.log('[REPORT] Report created successfully, adding EXP to user');
         const expResult = await addExpForCreateReport(session.user.id);
         if (expResult.success) {
-          console.log(`[REPORT] Successfully added ${expResult.newExp} EXP to user`);
         } else {
           console.error('[REPORT] Failed to add EXP:', expResult.error);
         }

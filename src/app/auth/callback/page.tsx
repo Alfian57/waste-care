@@ -31,7 +31,6 @@ export default function AuthCallbackPage() {
 
           // Ensure profile exists for the authenticated user
           if (data.session?.user) {
-            console.log('[AUTH CALLBACK] Ensuring profile exists for user');
             await ensureProfileExists(data.session.user.id);
           }
 

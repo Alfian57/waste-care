@@ -21,16 +21,6 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
         throw new Error('Data tidak lengkap');
       }
 
-      console.log('[UPLOAD] Report data:', {
-        hasLocation: !!reportData.location,
-        latitude: reportData.location?.latitude,
-        longitude: reportData.location?.longitude,
-        hasPhotos: reportData.photos.length > 0,
-        photoCount: reportData.photos.length,
-        photoLength: reportData.photos[0]?.length,
-        notes: reportData.notes
-      });
-
       // Simulate progress for first photo (0-30%)
       let currentProgress = 0;
       const progressInterval = setInterval(() => {
@@ -47,16 +37,6 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
         longitude: Number(reportData.location.longitude),
         notes: reportData.notes || '',
       };
-
-      console.log('[UPLOAD] Submitting with params:', {
-        hasImage: !!submitParams.imageBase64,
-        imageLength: submitParams.imageBase64?.length,
-        latitude: submitParams.latitude,
-        latitudeType: typeof submitParams.latitude,
-        longitude: submitParams.longitude,
-        longitudeType: typeof submitParams.longitude,
-        notes: submitParams.notes
-      });
 
       const result = await submitReport(submitParams);
 
