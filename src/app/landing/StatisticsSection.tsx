@@ -145,14 +145,14 @@ export default function StatisticsSection() {
                       <div className="flex-1 min-w-0">
                         <div className="mb-2">
                           <h4 className="text-xl font-bold text-gray-900 truncate" title={city.city}>{city.city}</h4>
-                          <span className="text-sm text-gray-500 truncate block" title={city.province}>DI {city.province}</span>
+                          <span className="text-sm text-gray-500 truncate block" title={city.province}>{city.province}</span>
                         </div>
 
                         {/* Progress Bar */}
                         <div className="mb-3">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm text-gray-600">Skor Kebersihan</span>
-                            <span className="text-sm font-semibold text-emerald-600">{city.score}%</span>
+                            <span className="text-sm text-gray-600 truncate">Skor Kebersihan</span>
+                            <span className="text-sm font-semibold text-emerald-600 ml-2 flex-shrink-0">{city.score}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
@@ -163,18 +163,18 @@ export default function StatisticsSection() {
                         </div>
 
                         {/* Statistics */}
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-emerald-600">{city.completedCampaigns}</div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
                             <div className="text-xs text-gray-600">Campaign Selesai</div>
+                            <div className="text-lg font-bold text-emerald-600">{city.completedCampaigns}</div>
                           </div>
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-blue-600">{city.activeReports}</div>
+                          <div className="flex items-center justify-between">
                             <div className="text-xs text-gray-600">Laporan Aktif</div>
+                            <div className="text-lg font-bold text-blue-600">{city.activeReports}</div>
                           </div>
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-orange-600">{city.cleanedAreas}</div>
+                          <div className="flex items-center justify-between">
                             <div className="text-xs text-gray-600">Area Dibersihkan</div>
+                            <div className="text-lg font-bold text-orange-600">{city.cleanedAreas}</div>
                           </div>
                         </div>
                       </div>
