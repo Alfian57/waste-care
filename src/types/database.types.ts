@@ -13,19 +13,16 @@ export interface Database {
         Row: {
           id: string
           email: string
-          username: string
           encrypted_password: string
         }
         Insert: {
           id?: string
           email: string
-          username: string
           encrypted_password: string
         }
         Update: {
           id?: string
           email?: string
-          username?: string
           encrypted_password?: string
         }
       }
@@ -45,6 +42,14 @@ export interface Database {
           created_at?: string
           exp?: number
         }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       campaigns: {
         Row: {
@@ -114,8 +119,7 @@ export interface Database {
           waste_volume: string
           location_category: string
           notes: string | null
-          lattitude: string
-          longitude: string
+          location: string // PostGIS geography type (returned as GeoJSON or WKT string)
         }
         Insert: {
           id?: number
@@ -126,8 +130,7 @@ export interface Database {
           waste_volume: string
           location_category: string
           notes?: string | null
-          latitude: string
-          longitude: string
+          location: string // PostGIS geography type
         }
         Update: {
           id?: number
@@ -138,8 +141,7 @@ export interface Database {
           waste_volume?: string
           location_category?: string
           notes?: string | null
-          latitude?: string
-          longitude?: string
+          location?: string // PostGIS geography type
         }
       }
     }
@@ -147,7 +149,58 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_reports_with_coordinates: {
+        Args: Record<string, never>
+        Returns: {
+          id: number
+          user_id: string
+          image_urls: string[]
+          created_at: string
+          waste_type: string
+          waste_volume: string
+          location_category: string
+          notes: string | null
+          latitude: number
+          longitude: number
+        }[]
+      }
+      get_province_statistics: {
+        Args: {
+          limit_count?: number
+        }
+        Returns: {
+          province_name: string
+          report_count: number
+          organic_count: number
+          inorganic_count: number
+          hazardous_count: number
+          mixed_count: number
+          avg_latitude: number
+          avg_longitude: number
+        }[]
+      }
+      get_city_statistics: {
+        Args: {
+          limit_count?: number
+        }
+        Returns: {
+          rank: number
+          city: string
+          province: string
+          score: number
+          completed_campaigns: number
+          active_reports: number
+          cleaned_areas: number
+        }[]
+      }
+      get_overall_statistics: {
+        Args: Record<string, never>
+        Returns: {
+          total_campaigns_completed: number
+          total_participants: number
+          total_cleaned_areas: number
+        }
+      }
     }
     Enums: {
       location_category_enum: 'sungai' | 'pinggir_jalan' | 'area_publik' | 'tanah_kosong' | 'lainnya'

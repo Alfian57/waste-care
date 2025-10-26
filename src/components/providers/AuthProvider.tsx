@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { ensureProfileExists } from '@/lib/expService';
 
 interface AuthContextType {
   user: User | null;
@@ -38,6 +39,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user ?? null);
         
+        // Ensure profile exists when user is authenticated
+        if (session?.user) {
+          await ensureProfileExists(session.user.id);
+        }
+        
         // Redirect logic after getting session
         if (!session?.user && !isPublicRoute) {
           // Not logged in and trying to access protected route
@@ -60,6 +66,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       async (event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Ensure profile exists when user signs in
+        if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
+          await ensureProfileExists(session.user.id);
+        }
 
         // Handle auth state changes
         if (event === 'SIGNED_OUT') {

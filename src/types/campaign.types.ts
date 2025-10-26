@@ -49,7 +49,7 @@ export interface CampaignWithParticipants extends CampaignRow {
     waste_type: string;
     waste_volume: string;
     location_category: string;
-    lattitude: string;
-    longitude: string;
+    latitude: number;
+    longitude: number;
   };
 }

@@ -14,8 +14,8 @@ interface Report {
   waste_volume: string;
   location_category: string;
   notes: string | null;
-  lattitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
 }
 
 export default function RiwayatLaporanPage() {
@@ -29,11 +29,11 @@ export default function RiwayatLaporanPage() {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('reports')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      // Use RPC function to get user's reports with extracted coordinates
+      const { data, error }: { data: Report[] | null; error: any } = await supabase
+        .rpc('get_user_reports_with_coordinates', {
+          p_user_id: user.id
+        } as any);
 
       if (error) throw error;
 

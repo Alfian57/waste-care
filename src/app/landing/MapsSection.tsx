@@ -2,7 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { supabase } from '@/lib/supabase';
+import { 
+  getReportsForMap, 
+  calculateStatistics,
+  type MapReport
+} from '@/lib/provinceService';
 
 // Dynamically import MapTilerMap to avoid SSR issues
 const MapTilerMap = dynamic(
@@ -10,17 +14,8 @@ const MapTilerMap = dynamic(
   { ssr: false }
 );
 
-interface WasteReport {
-  id: number;
-  lattitude: string;
-  longitude: string;
-  waste_type: string;
-  location_category: string;
-  image_urls: string[];
-}
-
 export default function MapsSection() {
-  const [reports, setReports] = useState<WasteReport[]>([]);
+  const [reports, setReports] = useState<MapReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
@@ -31,7 +26,7 @@ export default function MapsSection() {
   });
 
   useEffect(() => {
-    fetchReports();
+    fetchData();
   }, []);
 
   const getWasteTypeLabel = (type: string) => {
@@ -55,29 +50,18 @@ export default function MapsSection() {
     return labels[location] || location;
   };
 
-  const fetchReports = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('reports')
-        .select('id, lattitude, longitude, waste_type, location_category, image_urls')
-        .limit(100);
+      // Fetch reports for map display
+      const reportsData = await getReportsForMap(100);
 
-      if (error) throw error;
-
-      if (data) {
-        setReports(data);
-        
-        // Calculate statistics
-        const total = data.length;
-        const organic = data.filter((r: WasteReport) => r.waste_type === 'organik').length;
-        const inorganic = data.filter((r: WasteReport) => r.waste_type === 'anorganik').length;
-        const hazardous = data.filter((r: WasteReport) => r.waste_type === 'berbahaya').length;
-        const mixed = data.filter((r: WasteReport) => r.waste_type === 'campuran').length;
-
-        setStats({ total, organic, inorganic, hazardous, mixed });
-      }
+      setReports(reportsData);
+      
+      // Calculate overall statistics
+      const statistics = calculateStatistics(reportsData);
+      setStats(statistics);
     } catch (error) {
-      console.error('Error fetching reports:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
@@ -85,7 +69,7 @@ export default function MapsSection() {
 
   const markers = reports.map(report => ({
     id: report.id.toString(),
-    coordinates: [parseFloat(report.longitude), parseFloat(report.lattitude)] as [number, number],
+    coordinates: [report.longitude, report.latitude] as [number, number],
     type: 'waste' as const,
     title: getWasteTypeLabel(report.waste_type),
     location: getLocationLabel(report.location_category)

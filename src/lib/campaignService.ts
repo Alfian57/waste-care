@@ -18,8 +18,8 @@ type CampaignQueryResult = CampaignRow & {
     waste_type: string;
     waste_volume: string;
     location_category: string;
-    lattitude: string;
-    longitude: string;
+    latitude: number;
+    longitude: number;
   };
 };
 
@@ -28,36 +28,53 @@ type CampaignQueryResult = CampaignRow & {
  */
 export async function fetchCampaigns(userId?: string): Promise<Campaign[]> {
   try {
-    // Query campaigns dengan participant count dan report data
+    // Query campaigns dengan participant count
     const { data: campaigns, error } = await supabase
       .from('campaigns')
       .select(`
         *,
-        campaign_participants(profile_id),
-        reports(
-          id,
-          image_urls,
-          waste_type,
-          waste_volume,
-          location_category,
-          lattitude,
-          longitude
-        )
+        campaign_participants(profile_id)
       `)
-      .order('start_time', { ascending: true });
+      .order('start_time', { ascending: true}) as { data: any[] | null; error: any };
 
     if (error) throw error;
 
     if (!campaigns) return [];
 
+    // Get all unique report IDs
+    const reportIds = [...new Set(campaigns.map((c: any) => c.report_id))];
+    
+    // Fetch report coordinates for all reports
+    const { data: reports, error: reportsError }: { data: any[] | null; error: any } = await supabase
+      .rpc('get_reports_with_coordinates') as any;
+    
+    if (reportsError) {
+      console.error('Error fetching report coordinates:', reportsError);
+    }
+
+    // Create a map of report_id to report data
+    const reportsMap = new Map();
+    if (reports) {
+      reports.forEach((report: any) => {
+        reportsMap.set(report.id, report);
+      });
+    }
+
     // Transform data dari database ke Campaign interface
-    const transformedCampaigns: Campaign[] = campaigns.map((campaign: CampaignQueryResult) => {
+    const transformedCampaigns: Campaign[] = campaigns.map((campaign: any) => {
       const participantCount = campaign.campaign_participants?.length || 0;
       const isJoined = userId 
         ? campaign.campaign_participants?.some((p: { profile_id: string }) => p.profile_id === userId)
         : false;
 
-      return transformCampaignRow(campaign, participantCount, isJoined);
+      // Attach report data
+      const report = reportsMap.get(campaign.report_id);
+      const campaignWithReport = {
+        ...campaign,
+        reports: report || null
+      };
+
+      return transformCampaignRow(campaignWithReport, participantCount, isJoined);
     });
 
     return transformedCampaigns;
@@ -113,10 +130,14 @@ export async function joinCampaign(campaignId: number, userId: string): Promise<
 
     // Jika berhasil join campaign, tambahkan EXP ke user
     try {
-      await addExpForJoinCampaign(userId);
+      const expResult = await addExpForJoinCampaign(userId);
+      if (expResult.success) {
+      } else {
+        // do something
+      }
     } catch (expError) {
       // Log error tapi tidak gagalkan proses join campaign
-      console.error('Failed to add EXP for joining campaign:', expError);
+      console.error('[CAMPAIGN] Exception while adding EXP for joining campaign:', expError);
     }
 
     return true;
@@ -226,7 +247,7 @@ function transformCampaignRow(
 
   // Get coordinates from report
   const coordinates: [number, number] | undefined = row.reports 
-    ? [parseFloat(row.reports.longitude), parseFloat(row.reports.lattitude)]
+    ? [row.reports.longitude, row.reports.latitude]
     : undefined;
 
   // Get image from report

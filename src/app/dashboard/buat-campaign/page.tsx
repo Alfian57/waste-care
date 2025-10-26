@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button, Toast } from '@/app/components';
 import { useAuth } from '@/hooks/useAuth';
+import { Button, Toast } from '@/components';
 
 export default function BuatCampaignPage() {
   const router = useRouter();
@@ -95,8 +95,6 @@ export default function BuatCampaignPage() {
         },
         createdBy: user?.id
       };
-
-      console.log('Campaign Data:', campaignData);
 
       setToast({
         message: 'Campaign berhasil dibuat!',

@@ -16,8 +16,8 @@ export interface ReportLocation {
   waste_volume: string;
   location_category: string;
   notes: string | null;
-  lattitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
   distance_km: number;
 }
 
@@ -26,7 +26,7 @@ interface NearbyReportsResponse {
   data?: {
     reports: ReportLocation[];
     query: {
-      lattitude: string;
+      latitude: string;
       longitude: string;
       radius_km: number;
     };
@@ -51,7 +51,7 @@ export async function getNearbyReports(
 
     // Build query parameters
     const queryParams = new URLSearchParams({
-      lattitude: latitude.toString(),
+      latitude: latitude.toString(),
       longitude: longitude.toString(),
       radius_km: radiusKm.toString(),
       limit: limit.toString(),
@@ -74,6 +74,12 @@ export async function getNearbyReports(
       headers,
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Nearby reports request failed:', response.status, errorText);
+      throw new Error(`Failed to fetch nearby reports: ${response.statusText}`);
+    }
+
     const responseText = await response.text();
 
     let data: NearbyReportsResponse;
@@ -81,11 +87,8 @@ export async function getNearbyReports(
       data = JSON.parse(responseText);
     } catch (e) {
       console.error('Failed to parse response:', e);
+      console.error('Response text:', responseText.substring(0, 200));
       throw new Error(`Server returned invalid JSON: ${responseText.substring(0, 200)}`);
-    }
-
-    if (!response.ok) {
-      return data;
     }
 
     return data;

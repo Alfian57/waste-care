@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { ensureProfileExists } from '@/lib/expService';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function AuthCallbackPage() {
 
         if (accessToken) {
           // Set the session
-          const { error } = await supabase.auth.setSession({
+          const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken || '',
           });
@@ -26,6 +27,11 @@ export default function AuthCallbackPage() {
             console.error('Error setting session:', error);
             router.push('/login?error=auth_failed');
             return;
+          }
+
+          // Ensure profile exists for the authenticated user
+          if (data.session?.user) {
+            await ensureProfileExists(data.session.user.id);
           }
 
           // Redirect to dashboard on success

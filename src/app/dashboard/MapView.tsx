@@ -1,5 +1,5 @@
 import { MapTilerMap } from '@/components';
-import UserLocationButton from './UserLocationButton';
+import { useCallback } from 'react';
 import CloseButton from './CloseButton';
 import type { WasteMarker } from '.';
 
@@ -24,6 +24,14 @@ export default function MapView({
   routeStart = null,
   routeEnd = null,
 }: MapViewProps) {
+  const handleMapReady = useCallback(() => {
+    // Map is ready
+  }, []);
+
+  const handleMapError = useCallback((error: Error) => {
+    console.error('Map error:', error);
+  }, []);
+
   return (
     <div className="relative h-screen">
       <MapTilerMap
@@ -36,9 +44,6 @@ export default function MapView({
         routeStart={routeStart}
         routeEnd={routeEnd}
       />
-      
-      {/* Map Overlay - User Location Indicator */}
-      {!showDetails && <UserLocationButton />}
 
       {/* Close button for selected marker */}
       {showDetails && <CloseButton onClick={onCloseDetails} />}
