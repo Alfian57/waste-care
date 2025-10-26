@@ -32,6 +32,15 @@ export const getErrorMessage = (error: unknown): string => {
     return 'Gagal login dengan Google. Silakan coba lagi.';
   }
 
+  // Password update errors
+  if (message.includes('New password should be different')) {
+    return 'Password baru harus berbeda dengan password lama';
+  }
+
+  if (message.includes('password')) {
+    return 'Gagal mengubah password. Silakan coba lagi.';
+  }
+
   // Generic error
   return 'Terjadi kesalahan. Silakan coba lagi.';
 };
