@@ -21,6 +21,16 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
         throw new Error('Data tidak lengkap');
       }
 
+      console.log('[UPLOAD] Report data:', {
+        hasLocation: !!reportData.location,
+        latitude: reportData.location?.latitude,
+        longitude: reportData.location?.longitude,
+        hasPhotos: reportData.photos.length > 0,
+        photoCount: reportData.photos.length,
+        photoLength: reportData.photos[0]?.length,
+        notes: reportData.notes
+      });
+
       // Simulate progress for first photo (0-30%)
       let currentProgress = 0;
       const progressInterval = setInterval(() => {
@@ -31,12 +41,24 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
       }, 100);
 
       // Upload first photo - let AI generate waste type, volume, and location category
-      const result = await submitReport({
+      const submitParams = {
         imageBase64: reportData.photos[0],
-        latitude: reportData.location.latitude.toString(),
-        longitude: reportData.location.longitude.toString(),
-        notes: reportData.notes,
+        latitude: Number(reportData.location.latitude),
+        longitude: Number(reportData.location.longitude),
+        notes: reportData.notes || '',
+      };
+
+      console.log('[UPLOAD] Submitting with params:', {
+        hasImage: !!submitParams.imageBase64,
+        imageLength: submitParams.imageBase64?.length,
+        latitude: submitParams.latitude,
+        latitudeType: typeof submitParams.latitude,
+        longitude: submitParams.longitude,
+        longitudeType: typeof submitParams.longitude,
+        notes: submitParams.notes
       });
+
+      const result = await submitReport(submitParams);
 
       clearInterval(progressInterval);
 

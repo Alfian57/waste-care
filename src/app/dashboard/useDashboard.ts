@@ -61,7 +61,7 @@ export function useDashboard() {
   const wasteMarkers = useMemo<WasteMarker[]>(() => {
     return reports.map((report) => ({
       id: report.id.toString(),
-      coordinates: [parseFloat(report.longitude), parseFloat(report.lattitude)] as [number, number],
+      coordinates: [report.longitude, report.latitude] as [number, number],
       type: 'waste' as const,
       title: formatWasteType(report.waste_type),
       location: formatLocationCategory(report.location_category),

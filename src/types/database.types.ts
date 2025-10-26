@@ -119,8 +119,7 @@ export interface Database {
           waste_volume: string
           location_category: string
           notes: string | null
-          lattitude: string
-          longitude: string
+          location: string // PostGIS geography type (returned as GeoJSON or WKT string)
         }
         Insert: {
           id?: number
@@ -131,8 +130,7 @@ export interface Database {
           waste_volume: string
           location_category: string
           notes?: string | null
-          latitude: string
-          longitude: string
+          location: string // PostGIS geography type
         }
         Update: {
           id?: number
@@ -143,8 +141,7 @@ export interface Database {
           waste_volume?: string
           location_category?: string
           notes?: string | null
-          latitude?: string
-          longitude?: string
+          location?: string // PostGIS geography type
         }
       }
     }

@@ -12,8 +12,8 @@ const MapTilerMap = dynamic(
 
 interface WasteReport {
   id: number;
-  lattitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
   waste_type: string;
   location_category: string;
   image_urls: string[];
@@ -57,10 +57,10 @@ export default function MapsSection() {
 
   const fetchReports = async () => {
     try {
+      // Use RPC function to get reports with extracted coordinates
       const { data, error } = await supabase
-        .from('reports')
-        .select('id, lattitude, longitude, waste_type, location_category, image_urls')
-        .limit(100);
+        .rpc('get_reports_with_coordinates')
+        .limit(100) as { data: WasteReport[] | null; error: any };
 
       if (error) throw error;
 
@@ -85,7 +85,7 @@ export default function MapsSection() {
 
   const markers = reports.map(report => ({
     id: report.id.toString(),
-    coordinates: [parseFloat(report.longitude), parseFloat(report.lattitude)] as [number, number],
+    coordinates: [report.longitude, report.latitude] as [number, number],
     type: 'waste' as const,
     title: getWasteTypeLabel(report.waste_type),
     location: getLocationLabel(report.location_category)

@@ -16,8 +16,8 @@ export interface ReportLocation {
   waste_volume: string;
   location_category: string;
   notes: string | null;
-  lattitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
   distance_km: number;
 }
 
@@ -26,7 +26,7 @@ interface NearbyReportsResponse {
   data?: {
     reports: ReportLocation[];
     query: {
-      lattitude: string;
+      latitude: string;
       longitude: string;
       radius_km: number;
     };
@@ -51,7 +51,7 @@ export async function getNearbyReports(
 
     // Build query parameters
     const queryParams = new URLSearchParams({
-      lattitude: latitude.toString(),
+      latitude: latitude.toString(),
       longitude: longitude.toString(),
       radius_km: radiusKm.toString(),
       limit: limit.toString(),
