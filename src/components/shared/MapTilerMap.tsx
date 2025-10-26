@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Map, MapStyle, Marker } from '@maptiler/sdk';
+// @ts-ignore - CSS import
 import '@maptiler/sdk/dist/maptiler-sdk.css';
 
 interface MapTilerMapProps {
@@ -20,6 +21,9 @@ interface MapTilerMapProps {
   showRoute?: boolean;
   routeStart?: [number, number] | null;
   routeEnd?: [number, number] | null;
+  showUserLocation?: boolean;
+  onMapReady?: (map: Map) => void;
+  onMapError?: (error: Error) => void;
 }
 
 const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
@@ -31,15 +35,23 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
   onMarkerClick,
   showRoute = false,
   routeStart = null,
-  routeEnd = null
+  routeEnd = null,
+  showUserLocation = false,
+  onMapReady,
+  onMapError,
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<Map | null>(null);
   const markersRef = useRef<Marker[]>([]);
+  const userLocationMarkerRef = useRef<Marker | null>(null);
   const onMarkerClickRef = useRef(onMarkerClick);
   const routeLayerId = 'route';
   const routeOutlineLayerId = 'route-outline';
   const routeSourceId = 'route';
+
+  const [isOnline, setIsOnline] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   // Keep onMarkerClick ref updated
   useEffect(() => {
