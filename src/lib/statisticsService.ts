@@ -16,6 +16,47 @@ export interface OverallStatistics {
   totalCleanedAreas: number;
 }
 
+export interface WasteTypeStatistics {
+  total: number;
+  organic: number;
+  inorganic: number;
+  hazardous: number;
+  mixed: number;
+}
+
+/**
+ * Fetch waste type statistics from the database
+ */
+export async function fetchWasteTypeStatistics(): Promise<WasteTypeStatistics> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_waste_type_statistics')
+      .single() as any;
+
+    if (error) {
+      console.error('Error fetching waste type statistics:', error);
+      throw error;
+    }
+
+    return {
+      total: Number(data?.total || 0),
+      organic: Number(data?.organic || 0),
+      inorganic: Number(data?.inorganic || 0),
+      hazardous: Number(data?.hazardous || 0),
+      mixed: Number(data?.mixed || 0),
+    };
+  } catch (error) {
+    console.error('Error fetching waste type statistics:', error);
+    return {
+      total: 0,
+      organic: 0,
+      inorganic: 0,
+      hazardous: 0,
+      mixed: 0,
+    };
+  }
+}
+
 /**
  * Fetch overall statistics from the database
  */
