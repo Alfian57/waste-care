@@ -48,3 +48,48 @@ export const getErrorMessage = (error: unknown): string => {
 export const isEmailAlreadyRegistered = (data: { user?: { identities?: unknown[] } }): boolean => {
   return !!(data?.user && data.user.identities && data.user.identities.length === 0);
 };
+
+/**
+ * Get user-friendly error message for geolocation errors
+ */
+export const getGeolocationErrorMessage = (error: GeolocationPositionError): string => {
+  switch (error.code) {
+    case error.PERMISSION_DENIED:
+      return 'Izin lokasi ditolak. Mohon izinkan akses lokasi di pengaturan browser untuk melanjutkan.';
+    case error.POSITION_UNAVAILABLE:
+      return 'Informasi lokasi tidak tersedia. Pastikan GPS device Anda aktif.';
+    case error.TIMEOUT:
+      return 'Permintaan lokasi timeout. Silakan coba lagi atau periksa koneksi GPS Anda.';
+    default:
+      return 'Terjadi kesalahan saat mendapatkan lokasi. Silakan coba lagi.';
+  }
+};
+
+/**
+ * Get user-friendly error message for media device errors
+ */
+export const getMediaDeviceErrorMessage = (error: DOMException | Error): string => {
+  if (error instanceof DOMException) {
+    switch (error.name) {
+      case 'NotAllowedError':
+      case 'PermissionDeniedError':
+        return 'Izin kamera ditolak. Mohon izinkan akses kamera di pengaturan browser untuk melanjutkan.';
+      case 'NotFoundError':
+      case 'DevicesNotFoundError':
+        return 'Kamera tidak ditemukan. Pastikan device Anda memiliki kamera.';
+      case 'NotReadableError':
+      case 'TrackStartError':
+        return 'Kamera sedang digunakan oleh aplikasi lain. Silakan tutup aplikasi tersebut dan coba lagi.';
+      case 'OverconstrainedError':
+      case 'ConstraintNotSatisfiedError':
+        return 'Kamera tidak mendukung pengaturan yang diminta.';
+      case 'NotSupportedError':
+        return 'Browser Anda tidak mendukung akses kamera.';
+      case 'AbortError':
+        return 'Akses kamera dibatalkan.';
+      default:
+        return `Terjadi kesalahan dengan kamera: ${error.name}`;
+    }
+  }
+  return 'Terjadi kesalahan saat mengakses kamera. Silakan coba lagi.';
+};

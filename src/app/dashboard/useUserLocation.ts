@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getGeolocationErrorMessage } from '@/utils/errorMessages';
 
 interface UseUserLocationOptions {
   onLocationChange?: (latitude: number, longitude: number) => void;
@@ -22,7 +23,7 @@ export function useUserLocation({ onLocationChange, onError }: UseUserLocationOp
         },
         (error) => {
           console.error('Error getting location:', error);
-          const errorMessage = 'Tidak dapat mengakses lokasi. Menggunakan lokasi default.';
+          const errorMessage = getGeolocationErrorMessage(error);
           
           if (onError) {
             onError(errorMessage);

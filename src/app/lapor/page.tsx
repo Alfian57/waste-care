@@ -1,15 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button, BottomNavigation, Toast } from '@/components';
+import { Button, BottomNavigation, Toast, PermissionGuard } from '@/components';
 import { useReport } from '@/contexts/ReportContext';
 import { useLocation } from './useLocation';
+import { useGeolocationPermission } from '@/hooks/usePermission';
 import LocationHeader from './LocationHeader';
 import LocationInfo from './LocationInfo';
 
 export default function LaporGPSPage() {
   const { setLocation, reportData } = useReport();
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
+  const { permissionState, recheckPermission } = useGeolocationPermission();
 
   const {
     loading,
@@ -47,13 +49,19 @@ export default function LaporGPSPage() {
       <LocationHeader onBack={handleBack} />
 
       <div className="flex-1 flex flex-col justify-center px-6 py-8">
-        <LocationInfo
-          locationEnabled={locationEnabled}
-          locationError={locationError}
-          latitude={reportData.location?.latitude}
-          longitude={reportData.location?.longitude}
-          onActionClick={handleGetLocation}
-        />
+        <PermissionGuard 
+          type="location" 
+          permissionState={permissionState}
+          onRetry={recheckPermission}
+        >
+          <LocationInfo
+            locationEnabled={locationEnabled}
+            locationError={locationError}
+            latitude={reportData.location?.latitude}
+            longitude={reportData.location?.longitude}
+            onActionClick={handleGetLocation}
+          />
+        </PermissionGuard>
       </div>
 
       <div className="p-6">
