@@ -142,10 +142,10 @@ export default function StatisticsSection() {
                       </div>
 
                       {/* City Info */}
-                      <div className="flex-1">
-                        <div className="flex items-baseline gap-2 mb-1">
-                          <h4 className="text-xl font-bold text-gray-900">{city.city}</h4>
-                          <span className="text-sm text-gray-500">{city.province}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="mb-2">
+                          <h4 className="text-xl font-bold text-gray-900 truncate" title={city.city}>{city.city}</h4>
+                          <span className="text-sm text-gray-500 truncate block" title={city.province}>DI {city.province}</span>
                         </div>
 
                         {/* Progress Bar */}
