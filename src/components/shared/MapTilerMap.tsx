@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Map, MapStyle, Marker } from '@maptiler/sdk';
-// @ts-ignore - CSS import
+// CSS import for MapTiler SDK styles
 import '@maptiler/sdk/dist/maptiler-sdk.css';
 
 interface MapTilerMapProps {

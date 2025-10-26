@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { HeroSection, FeaturesSection, TeamSection, ClosingSection } from './components/index';
+import Link from 'next/link';
 
 export default function TentangPage() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,12 +38,12 @@ export default function TentangPage() {
               />
             </div>
 
-            <a
+            <Link
               href="/"
               className="px-4 sm:px-6 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-all text-sm sm:text-base whitespace-nowrap"
             >
               Kembali ke Beranda
-            </a>
+            </Link>
           </div>
         </div>
       </nav>
