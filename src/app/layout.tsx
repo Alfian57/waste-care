@@ -48,6 +48,7 @@ export const metadata: Metadata = {
     "mobile-web-app-capable": "yes",
     "msapplication-TileColor": "#16a34a",
     "msapplication-config": "/browserconfig.xml",
+    "google-site-verification": "Xc0I0NlFkYLtm1os5ld86ki1HSGsZlIQhJWWu3DgXa8",
   },
   openGraph: {
     type: "website",
