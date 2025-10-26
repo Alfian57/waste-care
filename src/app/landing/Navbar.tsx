@@ -68,7 +68,7 @@ export default function Navbar({ isScrolled = false }: NavbarProps) {
             <button
               onClick={() => router.push('/tentang')}
               className={`font-medium transition-colors ${
-                isScrolled ? 'text-gray-700 hover:text-emerald-600' : 'text-white hover:text-emerald-200'
+                isScrolled || isMobileMenuOpen ? 'text-gray-700 hover:text-emerald-600' : 'text-white hover:text-emerald-200'
               }`}
             >
               Tentang
@@ -123,6 +123,12 @@ export default function Navbar({ isScrolled = false }: NavbarProps) {
                 className="text-left font-medium transition-colors text-gray-700 hover:text-emerald-600"
               >
                 Statistik
+              </button>
+              <button
+                onClick={() => router.push('/tentang')}
+                className="text-left font-medium transition-colors text-gray-700 hover:text-emerald-600"
+              >
+                Tentang
               </button>
               <button
                 onClick={() => {
