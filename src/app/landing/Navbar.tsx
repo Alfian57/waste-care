@@ -30,12 +30,13 @@ export default function Navbar({ isScrolled = false }: NavbarProps) {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className={`w-10 h-10 bg-white rounded-full flex items-center justify-center`}>
-              <Image src="/icons/logo.png" alt="WasteCare Logo" width={24} height={24} />
-            </div>
-            <span className={`text-xl font-bold ${isScrolled || isMobileMenuOpen ? 'text-gray-900' : 'text-white'}`}>
-              WasteCare
-            </span>
+            <Image 
+              src={isScrolled ? "/logos/wastecare-with-text.png" : "/logos/wastecare-with-text2.png"}
+              alt="WasteCare Logo" 
+              width={120}
+              height={40}
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Navigation Links - Desktop */}
@@ -63,6 +64,14 @@ export default function Navbar({ isScrolled = false }: NavbarProps) {
               }`}
             >
               Statistik
+            </button>
+            <button
+              onClick={() => router.push('/tentang')}
+              className={`font-medium transition-colors ${
+                isScrolled ? 'text-gray-700 hover:text-emerald-600' : 'text-white hover:text-emerald-200'
+              }`}
+            >
+              Tentang
             </button>
             <button
               onClick={() => router.push('/login')}

@@ -23,6 +23,10 @@ export default function DashboardPage() {
     selectedMarker,
     handleMarkerClick,
     handleCloseDetails,
+    showRoute,
+    routeStart,
+    routeEnd,
+    toggleRoute,
   } = useDashboard();
 
   return (
@@ -44,6 +48,9 @@ export default function DashboardPage() {
           showDetails={showDetails}
           onMarkerClick={handleMarkerClick}
           onCloseDetails={handleCloseDetails}
+          showRoute={showRoute}
+          routeStart={routeStart}
+          routeEnd={routeEnd}
         />
       </div>
 
@@ -55,6 +62,8 @@ export default function DashboardPage() {
         onSearchChange={setSearchQuery}
         onSearchClick={handleSearch}
         onClose={handleCloseDetails}
+        showRoute={showRoute}
+        onToggleRoute={toggleRoute}
       />
 
       <BottomNavigation />

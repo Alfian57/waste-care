@@ -9,6 +9,9 @@ interface MapViewProps {
   showDetails: boolean;
   onMarkerClick: (markerId: string) => void;
   onCloseDetails: () => void;
+  showRoute?: boolean;
+  routeStart?: [number, number] | null;
+  routeEnd?: [number, number] | null;
 }
 
 export default function MapView({
@@ -17,6 +20,9 @@ export default function MapView({
   showDetails,
   onMarkerClick,
   onCloseDetails,
+  showRoute = false,
+  routeStart = null,
+  routeEnd = null,
 }: MapViewProps) {
   const handleMapReady = useCallback(() => {
     // Map is ready
@@ -34,8 +40,9 @@ export default function MapView({
         zoom={13}
         markers={markers}
         onMarkerClick={onMarkerClick}
-        onMapReady={handleMapReady}
-        onMapError={handleMapError}
+        showRoute={showRoute}
+        routeStart={routeStart}
+        routeEnd={routeEnd}
       />
 
       {/* Close button for selected marker */}

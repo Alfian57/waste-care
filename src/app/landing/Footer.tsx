@@ -21,10 +21,13 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center">
-                <Image src="/icons/logo.png" alt="WasteCare Logo" width={24} height={24} />
-              </div>
-              <span className="text-xl font-bold text-white">WasteCare</span>
+              <Image 
+                src="/logos/wastecare-with-text2.png" 
+                alt="WasteCare Logo" 
+                width={120}
+                height={40}
+                className="h-10 w-auto"
+              />
             </div>
             <p className="text-sm text-gray-400 mb-4">
               Platform digital untuk pengelolaan sampah yang lebih baik dan lingkungan yang lebih bersih.
@@ -83,6 +86,14 @@ export default function Footer() {
                   className="hover:text-emerald-400 transition-colors text-sm"
                 >
                   Statistik
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => router.push('/tentang')}
+                  className="hover:text-emerald-400 transition-colors text-sm"
+                >
+                  Tentang
                 </button>
               </li>
               <li>

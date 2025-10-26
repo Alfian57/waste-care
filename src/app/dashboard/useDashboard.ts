@@ -17,6 +17,8 @@ export function useDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [radiusKm] = useState(5);
   const [campaignMap, setCampaignMap] = useState<Map<number, boolean>>(new Map());
+  const [showRoute, setShowRoute] = useState(false);
+  const [savedRouteEnd, setSavedRouteEnd] = useState<[number, number] | null>(null);
 
   // Get display name
   const getDisplayName = () => {
@@ -90,6 +92,32 @@ export function useDashboard() {
     ? wasteMarkers.find(m => m.id === selectedMarkerId) 
     : null;
 
+  // Calculate route coordinates
+  const routeStart = userLocation;
+  
+  // Save route end when a marker is selected and route is shown
+  useEffect(() => {
+    if (selectedMarker && showRoute) {
+      setSavedRouteEnd(selectedMarker.coordinates);
+    }
+  }, [selectedMarker, showRoute]);
+
+  // Use saved route end if available and route is shown, even if marker is deselected
+  const routeEnd = showRoute 
+    ? (selectedMarker?.coordinates || savedRouteEnd)
+    : null;
+
+  // Toggle route display
+  const toggleRoute = useCallback(() => {
+    setShowRoute(prev => {
+      // If turning off the route, clear saved route end
+      if (prev) {
+        setSavedRouteEnd(null);
+      }
+      return !prev;
+    });
+  }, []);
+
   return {
     // User data
     displayName,
@@ -114,5 +142,11 @@ export function useDashboard() {
     selectedMarker,
     handleMarkerClick,
     handleCloseDetails,
+
+    // Routing
+    showRoute,
+    routeStart,
+    routeEnd,
+    toggleRoute,
   };
 }
