@@ -3,9 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { 
   fetchTopCities, 
-  fetchOverallStatistics, 
+  fetchOverallStatistics,
+  fetchWasteTypeStatistics,
   type CityStatistic,
-  type OverallStatistics 
+  type OverallStatistics,
+  type WasteTypeStatistics
 } from '@/lib/statisticsService';
 
 export default function StatisticsSection() {
@@ -14,6 +16,13 @@ export default function StatisticsSection() {
     totalCampaignsCompleted: 0,
     totalParticipants: 0,
     totalCleanedAreas: 0,
+  });
+  const [wasteStats, setWasteStats] = useState<WasteTypeStatistics>({
+    total: 0,
+    organic: 0,
+    inorganic: 0,
+    hazardous: 0,
+    mixed: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -24,12 +33,14 @@ export default function StatisticsSection() {
   const loadStatistics = async () => {
     try {
       setLoading(true);
-      const [cities, stats] = await Promise.all([
+      const [cities, stats, waste] = await Promise.all([
         fetchTopCities(),
         fetchOverallStatistics(),
+        fetchWasteTypeStatistics(),
       ]);
       setTopCities(cities);
       setOverallStats(stats);
+      setWasteStats(waste);
     } catch (error) {
       console.error('Error loading statistics:', error);
     } finally {
@@ -197,7 +208,7 @@ export default function StatisticsSection() {
           </div>
 
           {/* Achievement Cards */}
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <div className="text-center">
                 <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -249,6 +260,90 @@ export default function StatisticsSection() {
                   )}
                 </h4>
                 <p className="text-gray-600">Area Dibersihkan</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Waste Type Statistics */}
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-8 border border-blue-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
+                  <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
+                  <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">Statistik Jenis Sampah</h3>
+                <p className="text-gray-600">Total laporan berdasarkan kategori sampah</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-900 mb-1">
+                    {loading ? (
+                      <div className="animate-pulse h-9 w-16 bg-gray-200 rounded mx-auto"></div>
+                    ) : (
+                      wasteStats.total.toLocaleString('id-ID')
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">Total Laporan</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-emerald-600 mb-1">
+                    {loading ? (
+                      <div className="animate-pulse h-9 w-16 bg-gray-200 rounded mx-auto"></div>
+                    ) : (
+                      wasteStats.organic.toLocaleString('id-ID')
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">Organik</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600 mb-1">
+                    {loading ? (
+                      <div className="animate-pulse h-9 w-16 bg-gray-200 rounded mx-auto"></div>
+                    ) : (
+                      wasteStats.inorganic.toLocaleString('id-ID')
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">Anorganik</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-red-600 mb-1">
+                    {loading ? (
+                      <div className="animate-pulse h-9 w-16 bg-gray-200 rounded mx-auto"></div>
+                    ) : (
+                      wasteStats.hazardous.toLocaleString('id-ID')
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">Berbahaya</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-orange-600 mb-1">
+                    {loading ? (
+                      <div className="animate-pulse h-9 w-16 bg-gray-200 rounded mx-auto"></div>
+                    ) : (
+                      wasteStats.mixed.toLocaleString('id-ID')
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">Campuran</div>
+                </div>
               </div>
             </div>
           </div>

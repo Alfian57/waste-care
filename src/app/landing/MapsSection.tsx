@@ -3,10 +3,13 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { 
-  getReportsForMap, 
-  calculateStatistics,
+  getReportsForMap,
   type MapReport
 } from '@/lib/provinceService';
+import {
+  fetchWasteTypeStatistics,
+  type WasteTypeStatistics
+} from '@/lib/statisticsService';
 
 // Dynamically import MapTilerMap to avoid SSR issues
 const MapTilerMap = dynamic(
@@ -27,7 +30,7 @@ const MapTilerMap = dynamic(
 export default function MapsSection() {
   const [reports, setReports] = useState<MapReport[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<WasteTypeStatistics>({
     total: 0,
     organic: 0,
     inorganic: 0,
@@ -40,15 +43,15 @@ export default function MapsSection() {
 
     const fetchData = async () => {
       try {
-        // Fetch reports for map display
-        const reportsData = await getReportsForMap(100);
+        // Fetch reports for map display and statistics in parallel
+        const [reportsData, wasteStats] = await Promise.all([
+          getReportsForMap(100),
+          fetchWasteTypeStatistics()
+        ]);
 
         if (isMounted) {
           setReports(reportsData);
-          
-          // Calculate overall statistics
-          const statistics = calculateStatistics(reportsData);
-          setStats(statistics);
+          setStats(wasteStats);
         }
       } catch (error) {
         console.error('Error fetching data:', error);

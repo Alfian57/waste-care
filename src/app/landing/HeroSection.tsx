@@ -1,8 +1,46 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { 
+  fetchOverallStatistics, 
+  fetchWasteTypeStatistics,
+  type OverallStatistics,
+  type WasteTypeStatistics
+} from '@/lib/statisticsService';
 
 export default function HeroSection() {
+  const [overallStats, setOverallStats] = useState<OverallStatistics>({
+    totalCampaignsCompleted: 0,
+    totalParticipants: 0,
+    totalCleanedAreas: 0,
+  });
+  const [wasteStats, setWasteStats] = useState<WasteTypeStatistics>({
+    total: 0,
+    organic: 0,
+    inorganic: 0,
+    hazardous: 0,
+    mixed: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStatistics();
+  }, []);
+
+  const loadStatistics = async () => {
+    try {
+      const [stats, waste] = await Promise.all([
+        fetchOverallStatistics(),
+        fetchWasteTypeStatistics(),
+      ]);
+      setOverallStats(stats);
+      setWasteStats(waste);
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -64,15 +102,42 @@ export default function HeroSection() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-12 pt-12 border-t border-white border-opacity-20">
               <div>
-                <div className="text-3xl font-bold mb-1">1,234</div>
+                {loading ? (
+                  <div className="text-3xl font-bold mb-1">
+                    <div className="animate-pulse h-9 w-20 bg-white bg-opacity-20 rounded"></div>
+                  </div>
+                ) : (
+                  <div className="text-3xl font-bold mb-1">
+                    {wasteStats.total.toLocaleString('id-ID')}
+                  </div>
+                )}
                 <div className="text-emerald-100 text-sm">Laporan Aktif</div>
               </div>
               <div>
-                <div className="text-3xl font-bold mb-1">567</div>
+                {loading ? (
+                  <div className="text-3xl font-bold mb-1">
+                    <div className="animate-pulse h-9 w-20 bg-white bg-opacity-20 rounded"></div>
+                  </div>
+                ) : (
+                  <div className="text-3xl font-bold mb-1">
+                    {overallStats.totalCampaignsCompleted.toLocaleString('id-ID')}
+                  </div>
+                )}
                 <div className="text-emerald-100 text-sm">Campaign Selesai</div>
               </div>
               <div>
-                <div className="text-3xl font-bold mb-1">12K+</div>
+                {loading ? (
+                  <div className="text-3xl font-bold mb-1">
+                    <div className="animate-pulse h-9 w-20 bg-white bg-opacity-20 rounded"></div>
+                  </div>
+                ) : (
+                  <div className="text-3xl font-bold mb-1">
+                    {overallStats.totalParticipants > 1000 
+                      ? `${(overallStats.totalParticipants / 1000).toFixed(1)}K+`
+                      : overallStats.totalParticipants.toLocaleString('id-ID')
+                    }
+                  </div>
+                )}
                 <div className="text-emerald-100 text-sm">Pengguna Aktif</div>
               </div>
             </div>
