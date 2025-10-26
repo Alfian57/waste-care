@@ -39,7 +39,7 @@ export async function getNearbyReports(
   params: NearbyReportsParams
 ): Promise<NearbyReportsResponse> {
   try {
-    const { latitude, longitude, radiusKm = 5, limit = 50 } = params;
+    const { latitude, longitude, radiusKm = 10, limit = 50 } = params;
 
     // Get the session token
     const { data: { session } } = await supabase.auth.getSession();

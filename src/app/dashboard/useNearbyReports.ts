@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { getNearbyReports, type ReportLocation } from '@/lib/nearbyReportsService';
 
-export function useNearbyReports(radiusKm: number = 5) {
+export function useNearbyReports(radiusKm: number = 10) {
   const [reports, setReports] = useState<ReportLocation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

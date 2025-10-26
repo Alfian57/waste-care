@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { 
   getReportsForMap, 
@@ -11,7 +11,17 @@ import {
 // Dynamically import MapTilerMap to avoid SSR issues
 const MapTilerMap = dynamic(
   () => import('@/components/shared/MapTilerMap'),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-[600px] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Memuat peta...</p>
+        </div>
+      </div>
+    )
+  }
 );
 
 export default function MapsSection() {
@@ -26,8 +36,35 @@ export default function MapsSection() {
   });
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchData = async () => {
+      try {
+        // Fetch reports for map display
+        const reportsData = await getReportsForMap(100);
+
+        if (isMounted) {
+          setReports(reportsData);
+          
+          // Calculate overall statistics
+          const statistics = calculateStatistics(reportsData);
+          setStats(statistics);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchData();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Empty dependency array - only run once
 
   const getWasteTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
@@ -50,30 +87,22 @@ export default function MapsSection() {
     return labels[location] || location;
   };
 
-  const fetchData = async () => {
-    try {
-      // Fetch reports for map display
-      const reportsData = await getReportsForMap(100);
+  // Memoize markers to prevent unnecessary re-calculations
+  const markers = useMemo(() => {
+    if (reports.length === 0) return [];
+    return reports.map(report => ({
+      id: report.id.toString(),
+      coordinates: [report.longitude, report.latitude] as [number, number],
+      type: 'waste' as const,
+      title: getWasteTypeLabel(report.waste_type),
+      location: getLocationLabel(report.location_category)
+    }));
+  }, [reports]);
 
-      setReports(reportsData);
-      
-      // Calculate overall statistics
-      const statistics = calculateStatistics(reportsData);
-      setStats(statistics);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const markers = reports.map(report => ({
-    id: report.id.toString(),
-    coordinates: [report.longitude, report.latitude] as [number, number],
-    type: 'waste' as const,
-    title: getWasteTypeLabel(report.waste_type),
-    location: getLocationLabel(report.location_category)
-  }));
+  // Memoize empty marker click handler to prevent re-render
+  const handleMarkerClick = useCallback(() => {
+    // Empty function for landing page - just display markers
+  }, []);
 
   return (
     <section id="maps" className="py-20 bg-gray-50">
@@ -135,11 +164,18 @@ export default function MapsSection() {
                 <p className="text-gray-600">Memuat peta...</p>
               </div>
             </div>
+          ) : reports.length === 0 ? (
+            <div className="h-[600px] flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-gray-600">Tidak ada data laporan untuk ditampilkan</p>
+              </div>
+            </div>
           ) : (
             <div className="h-[600px]">
               <MapTilerMap
+                key="landing-map"
                 markers={markers}
-                onMarkerClick={() => {}}
+                onMarkerClick={handleMarkerClick}
               />
             </div>
           )}

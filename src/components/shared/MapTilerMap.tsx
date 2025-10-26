@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Map, MapStyle, Marker } from '@maptiler/sdk';
-// CSS import for MapTiler SDK styles
+// @ts-ignore - CSS import
 import '@maptiler/sdk/dist/maptiler-sdk.css';
 
 interface MapTilerMapProps {
@@ -45,6 +45,8 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
   const markersRef = useRef<Marker[]>([]);
   const userLocationMarkerRef = useRef<Marker | null>(null);
   const onMarkerClickRef = useRef(onMarkerClick);
+  const onMapReadyRef = useRef(onMapReady);
+  const onMapErrorRef = useRef(onMapError);
   const routeLayerId = 'route';
   const routeOutlineLayerId = 'route-outline';
   const routeSourceId = 'route';
@@ -53,10 +55,12 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [mapError, setMapError] = useState<string | null>(null);
 
-  // Keep onMarkerClick ref updated
+  // Keep callback refs updated
   useEffect(() => {
     onMarkerClickRef.current = onMarkerClick;
-  }, [onMarkerClick]);
+    onMapReadyRef.current = onMapReady;
+    onMapErrorRef.current = onMapError;
+  }, [onMarkerClick, onMapReady, onMapError]);
 
   // Monitor online/offline status for PWA
   useEffect(() => {
@@ -82,7 +86,7 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
       const error = new Error('MapTiler API key tidak tersedia');
       setMapError('Tidak dapat memuat peta. API key tidak ditemukan.');
       setIsLoading(false);
-      onMapError?.(error);
+      onMapErrorRef.current?.(error);
       return;
     }
 
@@ -110,7 +114,7 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
       // Handle map load
       mapInstance.on('load', () => {
         setIsLoading(false);
-        onMapReady?.(mapInstance);
+        onMapReadyRef.current?.(mapInstance);
         
         // Force remove any remaining attribution elements
         setTimeout(() => {
@@ -129,7 +133,7 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
           : 'Tidak ada koneksi internet. Peta tidak dapat dimuat.';
         setMapError(errorMsg);
         setIsLoading(false);
-        onMapError?.(new Error(errorMsg));
+        onMapErrorRef.current?.(new Error(errorMsg));
       });
 
       // Handle style load errors (e.g., tiles not loading)
@@ -142,7 +146,7 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
       const errorMsg = 'Gagal menginisialisasi peta. Silakan refresh halaman.';
       setMapError(errorMsg);
       setIsLoading(false);
-      onMapError?.(error instanceof Error ? error : new Error(errorMsg));
+      onMapErrorRef.current?.(error instanceof Error ? error : new Error(errorMsg));
     }
 
     return () => {
@@ -155,7 +159,7 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
         map.current = null;
       }
     };
-  }, [apiKey, center, zoom, showUserLocation, onMapReady, onMapError, isOnline]);
+  }, [apiKey, isOnline]); // Removed dependencies that cause re-initialization
 
   // Update markers separately
   useEffect(() => {

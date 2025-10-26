@@ -15,7 +15,7 @@ import { WasteMarker } from '.';
 export function useDashboard() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [radiusKm] = useState(5);
+  const [radiusKm] = useState(10);
   const [campaignMap, setCampaignMap] = useState<Map<number, boolean>>(new Map());
   const [showRoute, setShowRoute] = useState(false);
   const [savedRouteEnd, setSavedRouteEnd] = useState<[number, number] | null>(null);
