@@ -7,7 +7,7 @@
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.x-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![PWA](https://img.shields.io/badge/PWA-Enabled-purple)](https://web.dev/progressive-web-apps/)
 
-WasteCare adalah aplikasi Progressive Web App (PWA) untuk manajemen sampah cerdas yang memungkinkan pengguna melaporkan masalah sampah, bergabung dalam campaign pembersihan lingkungan, dan berkontribusi dalam menjaga kebersihan komunitas.
+WasteCare adalah aplikasi Progressive Web App (PWA) untuk manajemen sampah cerdas yang memungkinkan pengguna melaporkan masalah sampah, bergabung dalam campaign pembersihan lingkungan, dan berkontribusi dalam menjaga kebersihan komunitas
 
 ## 📋 Daftar Isi
 
