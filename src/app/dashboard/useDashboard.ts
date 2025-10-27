@@ -38,7 +38,7 @@ export function useDashboard() {
   const { reports, loading, error, setError, fetchNearbyReports } = useNearbyReports(radiusKm);
 
   // Get user location and fetch reports when location is available
-  const { userLocation } = useUserLocation({
+  const { userLocation, isRequestingLocation, requestLocation } = useUserLocation({
     onLocationChange: fetchNearbyReports,
     onError: setError,
   });
@@ -124,6 +124,8 @@ export function useDashboard() {
     
     // Location data
     userLocation,
+    isRequestingLocation,
+    requestLocation,
     
     // Reports data
     wasteMarkers,

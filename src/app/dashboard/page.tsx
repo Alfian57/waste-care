@@ -12,6 +12,8 @@ export default function DashboardPage() {
   const {
     displayName,
     userLocation,
+    isRequestingLocation,
+    requestLocation,
     wasteMarkers,
     loading,
     error,
@@ -51,6 +53,8 @@ export default function DashboardPage() {
           showRoute={showRoute}
           routeStart={routeStart}
           routeEnd={routeEnd}
+          isRequestingLocation={isRequestingLocation}
+          onRequestLocation={requestLocation}
         />
       </div>
 

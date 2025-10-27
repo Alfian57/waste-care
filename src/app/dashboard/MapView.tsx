@@ -1,6 +1,7 @@
 import { MapTilerMap } from '@/components';
 import { useCallback } from 'react';
 import CloseButton from './CloseButton';
+import LocationPermissionButton from './LocationPermissionButton';
 import type { WasteMarker } from '.';
 
 interface MapViewProps {
@@ -12,6 +13,8 @@ interface MapViewProps {
   showRoute?: boolean;
   routeStart?: [number, number] | null;
   routeEnd?: [number, number] | null;
+  isRequestingLocation?: boolean;
+  onRequestLocation?: () => void;
 }
 
 export default function MapView({
@@ -23,6 +26,8 @@ export default function MapView({
   showRoute = false,
   routeStart = null,
   routeEnd = null,
+  isRequestingLocation = false,
+  onRequestLocation,
 }: MapViewProps) {
   const handleMapReady = useCallback(() => {
     // Map is ready
@@ -43,7 +48,17 @@ export default function MapView({
         showRoute={showRoute}
         routeStart={routeStart}
         routeEnd={routeEnd}
+        userLocation={userLocation}
       />
+
+      {/* Location Permission Button */}
+      {onRequestLocation && (
+        <LocationPermissionButton 
+          onClick={onRequestLocation}
+          isRequesting={isRequestingLocation}
+          hasLocation={userLocation !== null}
+        />
+      )}
 
       {/* Close button for selected marker */}
       {showDetails && <CloseButton onClick={onCloseDetails} />}

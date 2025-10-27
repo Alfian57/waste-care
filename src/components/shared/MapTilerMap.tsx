@@ -22,6 +22,7 @@ interface MapTilerMapProps {
   routeStart?: [number, number] | null;
   routeEnd?: [number, number] | null;
   showUserLocation?: boolean;
+  userLocation?: [number, number] | null;
   onMapReady?: (map: Map) => void;
   onMapError?: (error: Error) => void;
 }
@@ -37,6 +38,7 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
   routeStart = null,
   routeEnd = null,
   showUserLocation = false,
+  userLocation = null,
   onMapReady,
   onMapError,
 }) => {
@@ -160,6 +162,17 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
       }
     };
   }, [apiKey, isOnline]); // Removed dependencies that cause re-initialization
+
+  // Update map center when center prop changes
+  useEffect(() => {
+    if (!map.current || isLoading) return;
+
+    try {
+      map.current.setCenter(center);
+    } catch (error) {
+      console.error('Error updating map center:', error);
+    }
+  }, [center, isLoading]);
 
   // Update markers separately
   useEffect(() => {
@@ -310,6 +323,93 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
       }
     };
   }, [showUserLocation, isLoading]);
+
+  // Display user location marker from prop
+  useEffect(() => {
+    if (!map.current || !userLocation || isLoading) return;
+
+    try {
+      // Remove old user location marker if exists
+      if (userLocationMarkerRef.current) {
+        userLocationMarkerRef.current.remove();
+      }
+
+      // Create user location marker element
+      const el = document.createElement('div');
+      el.className = 'user-location-marker';
+      el.style.width = '24px';
+      el.style.height = '24px';
+      el.style.position = 'relative';
+      
+      // Inner dot (blue)
+      el.innerHTML = `
+        <div style="
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 16px;
+          height: 16px;
+          background-color: #3b82f6;
+          border: 3px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        "></div>
+        <div style="
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 24px;
+          height: 24px;
+          background-color: rgba(59, 130, 246, 0.2);
+          border-radius: 50%;
+          animation: user-location-pulse 2s ease-in-out infinite;
+        "></div>
+      `;
+
+      // Add CSS animation if not exists
+      if (!document.getElementById('user-location-styles')) {
+        const style = document.createElement('style');
+        style.id = 'user-location-styles';
+        style.textContent = `
+          @keyframes user-location-pulse {
+            0%, 100% { 
+              opacity: 1; 
+              transform: translate(-50%, -50%) scale(1); 
+            }
+            50% { 
+              opacity: 0.3; 
+              transform: translate(-50%, -50%) scale(1.5); 
+            }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+
+      // Add marker to map
+      const marker = new Marker({ element: el })
+        .setLngLat(userLocation)
+        .addTo(map.current);
+      
+      userLocationMarkerRef.current = marker;
+    } catch (error) {
+      console.error('Error adding user location marker:', error);
+    }
+
+    return () => {
+      // Cleanup on unmount or when userLocation changes
+      if (userLocationMarkerRef.current) {
+        try {
+          userLocationMarkerRef.current.remove();
+          userLocationMarkerRef.current = null;
+        } catch (error) {
+          console.error('Error removing user location marker:', error);
+        }
+      }
+    };
+  }, [userLocation, isLoading]);
+
 
   // Handle route display
   useEffect(() => {
@@ -497,6 +597,14 @@ const arePropsEqual = (prevProps: MapTilerMapProps, nextProps: MapTilerMapProps)
     prevProps.routeStart?.[1] !== nextProps.routeStart?.[1] ||
     prevProps.routeEnd?.[0] !== nextProps.routeEnd?.[0] ||
     prevProps.routeEnd?.[1] !== nextProps.routeEnd?.[1]
+  ) {
+    return false;
+  }
+
+  // Compare user location
+  if (
+    prevProps.userLocation?.[0] !== nextProps.userLocation?.[0] ||
+    prevProps.userLocation?.[1] !== nextProps.userLocation?.[1]
   ) {
     return false;
   }

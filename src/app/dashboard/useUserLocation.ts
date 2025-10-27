@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getGeolocationErrorMessage } from '@/utils/errorMessages';
 
 interface UseUserLocationOptions {
@@ -8,13 +8,17 @@ interface UseUserLocationOptions {
 
 export function useUserLocation({ onLocationChange, onError }: UseUserLocationOptions = {}) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [isRequestingLocation, setIsRequestingLocation] = useState(false);
 
-  useEffect(() => {
+  const requestLocation = useCallback(() => {
+    setIsRequestingLocation(true);
+    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserLocation([longitude, latitude]);
+          setIsRequestingLocation(false);
           
           // Call the callback if provided
           if (onLocationChange) {
@@ -24,6 +28,7 @@ export function useUserLocation({ onLocationChange, onError }: UseUserLocationOp
         (error) => {
           console.error('Error getting location:', error);
           const errorMessage = getGeolocationErrorMessage(error);
+          setIsRequestingLocation(false);
           
           if (onError) {
             onError(errorMessage);
@@ -37,10 +42,16 @@ export function useUserLocation({ onLocationChange, onError }: UseUserLocationOp
           if (onLocationChange) {
             onLocationChange(defaultLat, defaultLon);
           }
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
       );
     } else {
       const errorMessage = 'Browser tidak mendukung geolocation';
+      setIsRequestingLocation(false);
       
       if (onError) {
         onError(errorMessage);
@@ -57,5 +68,13 @@ export function useUserLocation({ onLocationChange, onError }: UseUserLocationOp
     }
   }, [onLocationChange, onError]);
 
-  return { userLocation };
+  useEffect(() => {
+    requestLocation();
+  }, [requestLocation]);
+
+  return { 
+    userLocation, 
+    isRequestingLocation,
+    requestLocation 
+  };
 }
