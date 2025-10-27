@@ -123,7 +123,7 @@ export default function HeroSection() {
                     {overallStats.totalCampaignsCompleted.toLocaleString('id-ID')}
                   </div>
                 )}
-                <div className="text-emerald-100 text-sm">Campaign Selesai</div>
+                <div className="text-emerald-100 text-sm">Jumlah Campaign</div>
               </div>
               <div>
                 {loading ? (
