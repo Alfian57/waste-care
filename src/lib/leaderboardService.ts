@@ -74,15 +74,13 @@ export const leaderboardService = {
 
       // Map to leaderboard entries with proper ranking (handles ties)
       const leaderboard: LeaderboardEntry[] = [];
-      let currentRank = 1;
       
       for (let i = 0; i < profiles.length; i++) {
         const profile = profiles[i];
         
-        // If not the first entry and EXP is different from previous, update rank
-        if (i > 0 && profiles[i - 1].exp !== profile.exp) {
-          currentRank = i + 1;
-        }
+        // Always use position + 1 as rank for simplicity
+        // This ensures no duplicate ranks even with same EXP
+        const currentRank = i + 1;
         
         const email = emailMap.get(profile.id);
         const displayName = email ? censorEmail(email) : `User ${profile.id.slice(0, 8)}`;
