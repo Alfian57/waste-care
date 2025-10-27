@@ -56,7 +56,7 @@ export default function HeroSection() {
             </div>
             <div className="bg-emerald-800 backdrop-blur-md rounded-2xl p-6 border border-emerald-600 shadow-xl">
               <div className="text-4xl font-bold mb-2">567</div>
-              <div className="text-emerald-100 text-sm">Campaign Selesai</div>
+              <div className="text-emerald-100 text-sm">Jumlah Campaign</div>
             </div>
             <div className="bg-emerald-800 backdrop-blur-md rounded-2xl p-6 border border-emerald-600 shadow-xl">
               <div className="text-4xl font-bold mb-2">1,234</div>

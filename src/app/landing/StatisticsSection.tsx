@@ -10,6 +10,14 @@ import {
   type WasteTypeStatistics
 } from '@/lib/statisticsService';
 
+// Cache for statistics to avoid repeated API calls
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const statisticsCache: {
+  cities?: { data: CityStatistic[], timestamp: number },
+  overall?: { data: OverallStatistics, timestamp: number },
+  waste?: { data: WasteTypeStatistics, timestamp: number }
+} = {};
+
 export default function StatisticsSection() {
   const [topCities, setTopCities] = useState<CityStatistic[]>([]);
   const [overallStats, setOverallStats] = useState<OverallStatistics>({
@@ -25,28 +33,55 @@ export default function StatisticsSection() {
     mixed: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadStatistics();
-  }, []);
+  const isCacheValid = (timestamp: number) => {
+    return Date.now() - timestamp < CACHE_DURATION;
+  };
 
-  const loadStatistics = async () => {
+  const loadStatistics = React.useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
+      // Check cache first
+      const now = Date.now();
+      const citiesFromCache = statisticsCache.cities && isCacheValid(statisticsCache.cities.timestamp);
+      const overallFromCache = statisticsCache.overall && isCacheValid(statisticsCache.overall.timestamp);
+      const wasteFromCache = statisticsCache.waste && isCacheValid(statisticsCache.waste.timestamp);
+
+      // Use cache if available, otherwise fetch
       const [cities, stats, waste] = await Promise.all([
-        fetchTopCities(),
-        fetchOverallStatistics(),
-        fetchWasteTypeStatistics(),
+        citiesFromCache ? Promise.resolve(statisticsCache.cities!.data) : fetchTopCities(),
+        overallFromCache ? Promise.resolve(statisticsCache.overall!.data) : fetchOverallStatistics(),
+        wasteFromCache ? Promise.resolve(statisticsCache.waste!.data) : fetchWasteTypeStatistics(),
       ]);
+
+      // Update cache
+      if (!citiesFromCache) {
+        statisticsCache.cities = { data: cities, timestamp: now };
+      }
+      if (!overallFromCache) {
+        statisticsCache.overall = { data: stats, timestamp: now };
+      }
+      if (!wasteFromCache) {
+        statisticsCache.waste = { data: waste, timestamp: now };
+      }
+
       setTopCities(cities);
       setOverallStats(stats);
       setWasteStats(waste);
-    } catch (error) {
-      console.error('Error loading statistics:', error);
+    } catch (err) {
+      console.error('Error loading statistics:', err);
+      setError('Gagal memuat statistik. Silakan refresh halaman.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadStatistics();
+  }, [loadStatistics]);
 
   const getRankBadgeColor = (rank: number) => {
     switch (rank) {
@@ -122,6 +157,27 @@ export default function StatisticsSection() {
                     </div>
                   </div>
                 ))
+              ) : error ? (
+                // Error state
+                <div className="bg-red-50 rounded-xl p-12 shadow-sm text-center border border-red-200">
+                  <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-red-900 mb-2">
+                    Gagal Memuat Data
+                  </h4>
+                  <p className="text-red-700 max-w-md mx-auto mb-4">
+                    {error}
+                  </p>
+                  <button
+                    onClick={loadStatistics}
+                    className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Coba Lagi
+                  </button>
+                </div>
               ) : topCities.length === 0 ? (
                 // Empty state
                 <div className="bg-white rounded-xl p-12 shadow-sm text-center">
@@ -163,12 +219,12 @@ export default function StatisticsSection() {
                         <div className="mb-3">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm text-gray-600 truncate">Skor Kebersihan</span>
-                            <span className="text-sm font-semibold text-emerald-600 ml-2 flex-shrink-0">{city.score}%</span>
+                            <span className="text-sm font-semibold text-emerald-600 ml-2 flex-shrink-0">{city.completedCampaigns / city.activeReports * 100}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
                               className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
-                              style={{ width: `${city.score}%` }}
+                              style={{ width: `${city.completedCampaigns / city.activeReports * 100}%` }}
                             />
                           </div>
                         </div>
@@ -176,7 +232,7 @@ export default function StatisticsSection() {
                         {/* Statistics */}
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className="text-xs text-gray-600">Campaign Selesai</div>
+                            <div className="text-xs text-gray-600">Jumlah Campaign</div>
                             <div className="text-lg font-bold text-emerald-600">{city.completedCampaigns}</div>
                           </div>
                           <div className="flex items-center justify-between">
@@ -223,7 +279,7 @@ export default function StatisticsSection() {
                     overallStats.totalCampaignsCompleted.toLocaleString('id-ID')
                   )}
                 </h4>
-                <p className="text-gray-600">Total Campaign Selesai</p>
+                <p className="text-gray-600">Jumlah Campaign</p>
               </div>
             </div>
 
