@@ -28,10 +28,9 @@ export function CampaignDetailModal({ campaign, isOpen, onClose, onJoin }: Campa
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center">
-      <div className="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl max-h-[90vh] overflow-y-auto">
-        {/* Header Image */}
-        <div className="relative h-64 bg-gray-200">
+    <div className="fixed inset-0 z-50 bg-white pb-20 overflow-y-auto">
+      {/* Header Image */}
+      <div className="relative h-64 bg-gray-200">
           <img
             src={campaign.imageUrl}
             alt={campaign.title}
@@ -192,7 +191,6 @@ export function CampaignDetailModal({ campaign, isOpen, onClose, onJoin }: Campa
             )}
           </div>
         </div>
-      </div>
     </div>
   );
 }
