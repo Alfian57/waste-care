@@ -91,12 +91,24 @@ export async function fetchOverallStatistics(): Promise<OverallStatistics> {
  */
 export async function fetchTopCities(): Promise<CityStatistic[]> {
   try {
-    const { data, error } = await supabase
-      .rpc('get_city_statistics', { limit_count: 5 } as any) as any;
+    // Add timeout to prevent long-running queries
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
+    });
+
+    const fetchPromise = supabase
+      .rpc('get_city_statistics', { limit_count: 5 } as any);
+
+    // Race between timeout and actual request
+    const { data, error } = await Promise.race([
+      fetchPromise,
+      timeoutPromise
+    ]) as any;
 
     if (error) {
       console.error('Error fetching city statistics:', error);
-      throw error;
+      // Return empty array on error instead of throwing
+      return [];
     }
 
     // If no data or empty, return empty array
@@ -117,6 +129,7 @@ export async function fetchTopCities(): Promise<CityStatistic[]> {
     }));
   } catch (error) {
     console.error('Error fetching top cities:', error);
+    // Return empty array on any error including timeout
     return [];
   }
 }
