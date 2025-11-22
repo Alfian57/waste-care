@@ -22,7 +22,9 @@ interface BottomSheetProps {
   reportLocation?: [number, number];
   onRevalidateClick?: () => void;
   hasCampaign?: boolean;
+  campaignId?: number;
   onCreateCampaignClick?: () => void;
+  onOpenCampaignClick?: () => void;
   showRouteButton?: boolean;
   showRoute?: boolean;
   onToggleRoute?: () => void;
@@ -46,7 +48,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   reportLocation,
   onRevalidateClick,
   hasCampaign = false,
+  campaignId,
   onCreateCampaignClick,
+  onOpenCampaignClick,
   showRouteButton = false,
   showRoute = false,
   onToggleRoute,
@@ -238,16 +242,28 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
                     </Button>
                     )}
                   
-                    {/* Create Campaign Button - Only show if no campaign exists */}
-                    {!hasCampaign && (
-                    <Button
-                      fullWidth
-                      variant="outline"
-                      className="border-2 border-[#16a34a] text-[#16a34a] hover:bg-[#15803d] hover:text-gray-500"
-                      onClick={onCreateCampaignClick}
-                    >
-                      Buat Campaign
-                    </Button>
+                    {/* Campaign Button - Show different button based on campaign existence */}
+                    {hasCampaign && campaignId ? (
+                      <Button
+                        fullWidth
+                        variant="outline"
+                        className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                        onClick={onOpenCampaignClick}
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        Buka Campaign
+                      </Button>
+                    ) : (
+                      <Button
+                        fullWidth
+                        variant="outline"
+                        className="border-2 border-[#16a34a] text-[#16a34a] hover:bg-[#15803d] hover:text-white"
+                        onClick={onCreateCampaignClick}
+                      >
+                        Buat Campaign
+                      </Button>
                     )}
                   
                   {/* Revalidate Button */}

@@ -27,10 +27,10 @@ export default function DashboardBottomSheet({
 }: DashboardBottomSheetProps) {
   const router = useRouter();
 
-  // TODO: Check if campaign exists for this report
-  // For now, we'll use a simple check based on report ID
-  const hasCampaign = false; // This should be fetched from database
-  const campaignId = undefined; // This should be the actual campaign ID if exists
+  const handleOpenCampaign = () => {
+    if (!selectedMarker?.campaignId) return;
+    router.push(`/campaign?campaignId=${selectedMarker.campaignId}`);
+  };
 
   const handleRevalidateClick = () => {
     if (!selectedMarker) return;
@@ -79,8 +79,10 @@ export default function DashboardBottomSheet({
         selectedMarker.coordinates[1]
       ] : undefined}
       hasCampaign={selectedMarker?.hasCampaign || false}
+      campaignId={selectedMarker?.campaignId}
       onRevalidateClick={handleRevalidateClick}
       onCreateCampaignClick={handleCreateCampaignClick}
+      onOpenCampaignClick={handleOpenCampaign}
       showRouteButton={showDetails && !!selectedMarker}
       showRoute={showRoute}
       onToggleRoute={onToggleRoute}

@@ -8,7 +8,7 @@ import {
   formatLocationCategory,
   formatDistance,
 } from '@/lib/nearbyReportsService';
-import { getCampaignsByReportIds } from '@/lib/campaignService';
+import { getCampaignsByReportIds, getCampaignDetailsByReportIds } from '@/lib/campaignService';
 import { useUserLocation } from './useUserLocation';
 import { WasteMarker } from '.';
 
@@ -17,6 +17,7 @@ export function useDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [radiusKm] = useState(10);
   const [campaignMap, setCampaignMap] = useState<Map<number, boolean>>(new Map());
+  const [campaignDetailsMap, setCampaignDetailsMap] = useState<Map<number, { id: number; status: string }>>(new Map());
   const [showRoute, setShowRoute] = useState(false);
   const [savedRouteEnd, setSavedRouteEnd] = useState<[number, number] | null>(null);
 
@@ -48,6 +49,7 @@ export function useDashboard() {
     if (reports.length > 0) {
       const reportIds = reports.map(r => r.id);
       getCampaignsByReportIds(reportIds).then(setCampaignMap);
+      getCampaignDetailsByReportIds(reportIds).then(setCampaignDetailsMap);
     }
   }, [reports]);
 
@@ -61,22 +63,26 @@ export function useDashboard() {
 
   // Convert reports to markers format
   const wasteMarkers = useMemo<WasteMarker[]>(() => {
-    return reports.map((report) => ({
-      id: report.id.toString(),
-      coordinates: [report.longitude, report.latitude] as [number, number],
-      type: 'waste' as const,
-      title: formatWasteType(report.waste_type),
-      location: formatLocationCategory(report.location_category),
-      wasteType: formatWasteType(report.waste_type),
-      amount: formatWasteVolume(report.waste_volume),
-      category: formatLocationCategory(report.location_category),
-      distance: formatDistance(report.distance_km),
-      imageUrls: report.image_urls,
-      notes: report.notes,
-      createdAt: report.created_at,
-      hasCampaign: campaignMap.get(report.id) || false,
-    }));
-  }, [reports, campaignMap]);
+    return reports.map((report) => {
+      const campaignDetails = campaignDetailsMap.get(report.id);
+      return {
+        id: report.id.toString(),
+        coordinates: [report.longitude, report.latitude] as [number, number],
+        type: 'waste' as const,
+        title: formatWasteType(report.waste_type),
+        location: formatLocationCategory(report.location_category),
+        wasteType: formatWasteType(report.waste_type),
+        amount: formatWasteVolume(report.waste_volume),
+        category: formatLocationCategory(report.location_category),
+        distance: formatDistance(report.distance_km),
+        imageUrls: report.image_urls,
+        notes: report.notes,
+        createdAt: report.created_at,
+        hasCampaign: campaignMap.get(report.id) || false,
+        campaignId: campaignDetails?.id,
+      };
+    });
+  }, [reports, campaignMap, campaignDetailsMap]);
 
   // Search handler
   const handleSearch = useCallback(() => {

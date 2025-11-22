@@ -68,7 +68,7 @@ export default function CreateCampaignForm() {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'maxParticipants' ? parseInt(value) || 2 : value,
+      [name]: name === 'maxParticipants' ? (value === '' ? '' as any : parseInt(value)) : value,
     }));
   };
 
@@ -95,7 +95,18 @@ export default function CreateCampaignForm() {
       }
 
       // Combine date and time
-      const startDateTime = new Date(`${formData.date}T${formData.time}`);
+      // Parse as local time, then convert to ISO string
+      const [year, month, day] = formData.date.split('-').map(Number);
+      const [hours, minutes] = formData.time.split(':').map(Number);
+      
+      // Create date in local timezone
+      const startDateTime = new Date(year, month - 1, day, hours, minutes, 0);
+      
+      // Validate that campaign is not in the past
+      const now = new Date();
+      if (startDateTime < now) {
+        throw new Error('Waktu campaign tidak boleh di masa lalu');
+      }
       
       // Set end time to 2 hours after start time
       const endDateTime = new Date(startDateTime);
@@ -251,6 +262,7 @@ export default function CreateCampaignForm() {
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
+                min={new Date().toISOString().split('T')[0]}
                 required
               />
             </div>
@@ -297,7 +309,7 @@ export default function CreateCampaignForm() {
               onChange={handleInputChange}
               placeholder="Tambahkan informasi tambahan tentang campaign..."
               rows={4}
-              className="w-full px-4 py-3 text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-['CircularStd'] text-sm resize-none"
+              className="w-full px-4 py-3 text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-['CircularStd'] text-sm resize-none"
             />
           </div>
         </div>
@@ -320,7 +332,7 @@ export default function CreateCampaignForm() {
                 onClick={() => handleOrganizerTypeChange('personal')}
                 className={`w-full p-4 rounded-xl border-2 transition-all ${
                   formData.organizerType === 'personal'
-                    ? 'border-green-500 bg-green-50'
+                    ? 'border-emerald-500 bg-emerald-50'
                     : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
@@ -328,12 +340,12 @@ export default function CreateCampaignForm() {
                   <div
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${
                       formData.organizerType === 'personal'
-                        ? 'border-green-500'
+                        ? 'border-emerald-500'
                         : 'border-gray-300'
                     }`}
                   >
                     {formData.organizerType === 'personal' && (
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
                     )}
                   </div>
                   <div className="flex-1 text-left">
@@ -341,7 +353,7 @@ export default function CreateCampaignForm() {
                       <svg
                         className={`w-5 h-5 ${
                           formData.organizerType === 'personal'
-                            ? 'text-green-600'
+                            ? 'text-emerald-600'
                             : 'text-gray-600'
                         }`}
                         fill="none"
@@ -358,7 +370,7 @@ export default function CreateCampaignForm() {
                       <span
                         className={`font-semibold font-['CircularStd'] ${
                           formData.organizerType === 'personal'
-                            ? 'text-green-700'
+                            ? 'text-emerald-700'
                             : 'text-gray-700'
                         }`}
                       >
@@ -378,7 +390,7 @@ export default function CreateCampaignForm() {
                 onClick={() => handleOrganizerTypeChange('organization')}
                 className={`w-full p-4 rounded-xl border-2 transition-all ${
                   formData.organizerType === 'organization'
-                    ? 'border-green-500 bg-green-50'
+                    ? 'border-emerald-500 bg-emerald-50'
                     : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
@@ -386,12 +398,12 @@ export default function CreateCampaignForm() {
                   <div
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${
                       formData.organizerType === 'organization'
-                        ? 'border-green-500'
+                        ? 'border-emerald-500'
                         : 'border-gray-300'
                     }`}
                   >
                     {formData.organizerType === 'organization' && (
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
                     )}
                   </div>
                   <div className="flex-1 text-left">
@@ -399,7 +411,7 @@ export default function CreateCampaignForm() {
                       <svg
                         className={`w-5 h-5 ${
                           formData.organizerType === 'organization'
-                            ? 'text-green-600'
+                            ? 'text-emerald-600'
                             : 'text-gray-600'
                         }`}
                         fill="none"
@@ -416,7 +428,7 @@ export default function CreateCampaignForm() {
                       <span
                         className={`font-semibold font-['CircularStd'] ${
                           formData.organizerType === 'organization'
-                            ? 'text-green-700'
+                            ? 'text-emerald-700'
                             : 'text-gray-700'
                         }`}
                       >
@@ -443,8 +455,8 @@ export default function CreateCampaignForm() {
               onChange={handleInputChange}
               placeholder={
                 formData.organizerType === 'personal'
-                  ? 'Masalah: Al Haythem'
-                  : 'Masalah: Yayasan Peduli Lingkungan'
+                  ? 'Al Haytham'
+                  : 'Yayasan Peduli Lingkungan'
               }
               required
             />
@@ -457,7 +469,7 @@ export default function CreateCampaignForm() {
             type="submit"
             fullWidth
             disabled={loading}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300"
+            className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300"
           >
             {loading ? 'Membuat Campaign...' : 'Buat Campaign'}
           </Button>

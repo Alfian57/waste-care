@@ -216,6 +216,56 @@ export async function getCampaignsByReportIds(reportIds: number[]): Promise<Map<
 }
 
 /**
+ * Get campaign details (ID and status) by report IDs
+ */
+export async function getCampaignDetailsByReportIds(reportIds: number[]): Promise<Map<number, { id: number; status: string }>> {
+  try {
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('id, report_id, status')
+      .in('report_id', reportIds);
+
+    if (error) throw error;
+
+    const campaignDetailsMap = new Map<number, { id: number; status: string }>();
+    
+    if (data) {
+      data.forEach((campaign: { id: number; report_id: number; status: string }) => {
+        campaignDetailsMap.set(campaign.report_id, { id: campaign.id, status: campaign.status });
+      });
+    }
+
+    return campaignDetailsMap;
+  } catch (error) {
+    console.error('Error fetching campaign details by report IDs:', error);
+    return new Map();
+  }
+}
+
+/**
+ * Determine campaign status based on current time
+ */
+function determineCampaignStatus(startTime: string, endTime: string, dbStatus: string): 'upcoming' | 'ongoing' | 'finished' {
+  const now = new Date();
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+
+  // If manually marked as finished, keep it finished
+  if (dbStatus === 'finished') {
+    return 'finished';
+  }
+
+  // Determine status based on time
+  if (now < start) {
+    return 'upcoming';
+  } else if (now >= start && now <= end) {
+    return 'ongoing';
+  } else {
+    return 'finished';
+  }
+}
+
+/**
  * Transform campaign row dari database ke Campaign interface
  */
 function transformCampaignRow(
@@ -259,6 +309,9 @@ function transformCampaignRow(
   // Get estimated volume from report
   const estimatedVolume = row.reports ? formatWasteVolume(row.reports.waste_volume) : undefined;
 
+  // Determine actual status based on time
+  const actualStatus = determineCampaignStatus(row.start_time, row.end_time, row.status);
+
   return {
     id: row.id.toString(),
     title: row.title,
@@ -271,7 +324,7 @@ function transformCampaignRow(
     time,
     participants: participantCount,
     maxParticipants: row.max_participants,
-    status: row.status,
+    status: actualStatus,
     imageUrl,
     organizer: row.organizer_name,
     wasteTypes,
