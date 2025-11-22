@@ -15,7 +15,15 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleUpload = async () => {
+    let progressInterval: NodeJS.Timeout | null = null;
+    let completeProgress: NodeJS.Timeout | null = null;
+    
     try {
+      // Reset state
+      setError(null);
+      setProgress(0);
+      setUploading(true);
+      
       // Validate only required data (location and photos)
       if (!reportData.location || reportData.photos.length === 0) {
         throw new Error('Data tidak lengkap');
@@ -23,12 +31,17 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
 
       // Simulate progress for first photo (0-30%)
       let currentProgress = 0;
-      const progressInterval = setInterval(() => {
-        currentProgress += 5;
+      progressInterval = setInterval(() => {
+        currentProgress += 3;
         if (currentProgress <= 30) {
           setProgress(currentProgress);
+        } else {
+          if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+          }
         }
-      }, 100);
+      }, 200);
 
       // Upload first photo - let AI generate waste type, volume, and location category
       const submitParams = {
@@ -38,9 +51,24 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
         notes: reportData.notes || '',
       };
 
-      const result = await submitReport(submitParams);
+      // Add timeout for submit report (90 seconds for AI processing)
+      const submitPromise = submitReport(submitParams);
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout setelah 90 detik. Mohon periksa koneksi internet Anda dan coba lagi.')), 90000)
+      );
+      
+      const result = await Promise.race([submitPromise, timeoutPromise]);
 
-      clearInterval(progressInterval);
+      // Clear progress interval after successful response
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+      
+      // Ensure we're at least at 30% before proceeding
+      if (progress < 30) {
+        setProgress(30);
+      }
 
       // Check if upload was successful
       if (!result.success) {
@@ -88,15 +116,15 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
       }
 
       // Simulate remaining progress (30-100%)
-      const completeProgress = setInterval(() => {
+      completeProgress = setInterval(() => {
         setProgress(prev => {
           if (prev >= 100) {
-            clearInterval(completeProgress);
+            if (completeProgress) clearInterval(completeProgress);
             setUploading(false);
             // Navigate to success page using Next.js router
             setTimeout(() => {
               router.push('/lapor/konfirmasi-data');
-            }, 1000);
+            }, 500);
             return 100;
           }
           return prev + 10;
@@ -104,9 +132,38 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
       }, 100);
 
     } catch (err) {
+      // Clean up all intervals on error
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+      if (completeProgress) {
+        clearInterval(completeProgress);
+        completeProgress = null;
+      }
+      
       console.error('Upload error:', err);
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengunggah');
+      
+      // Provide more user-friendly error messages
+      let errorMessage = 'Terjadi kesalahan saat mengunggah';
+      
+      if (err instanceof Error) {
+        if (err.message.includes('timeout')) {
+          errorMessage = 'Koneksi terlalu lambat atau server sedang sibuk.\n\nSaran:\n• Periksa koneksi internet Anda\n• Coba gunakan foto dengan ukuran lebih kecil\n• Coba lagi beberapa saat';
+        } else if (err.message.includes('Network request failed') || err.message.includes('Failed to fetch') || err.message.includes('Network error')) {
+          errorMessage = 'Tidak ada koneksi internet.\n\nMohon periksa koneksi internet Anda dan coba lagi.';
+        } else if (err.message.includes('Session expired') || err.message.includes('Session refresh failed')) {
+          errorMessage = 'Sesi login Anda telah berakhir.\n\nMohon login kembali untuk melanjutkan.';
+        } else if (err.message.includes('Ukuran gambar terlalu besar')) {
+          errorMessage = err.message + '\n\nMohon gunakan foto dengan resolusi lebih rendah.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
       setUploading(false);
+      setProgress(0);
     }
   };
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getGeolocationErrorMessage } from '@/utils/errorMessages';
 
 interface UseUserLocationOptions {
@@ -9,6 +9,25 @@ interface UseUserLocationOptions {
 export function useUserLocation({ onLocationChange, onError }: UseUserLocationOptions = {}) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isRequestingLocation, setIsRequestingLocation] = useState(false);
+  
+  // Ref untuk debounce timer
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Wrapper callback dengan debounce
+  const debouncedLocationChange = useCallback((latitude: number, longitude: number) => {
+    if (!onLocationChange) return;
+
+    // Clear timer sebelumnya
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set timer baru untuk debounce 300ms
+    debounceTimerRef.current = setTimeout(() => {
+      onLocationChange(latitude, longitude);
+      debounceTimerRef.current = null;
+    }, 300);
+  }, [onLocationChange]);
 
   const requestLocation = useCallback(() => {
     setIsRequestingLocation(true);
@@ -20,10 +39,8 @@ export function useUserLocation({ onLocationChange, onError }: UseUserLocationOp
           setUserLocation([longitude, latitude]);
           setIsRequestingLocation(false);
           
-          // Call the callback if provided
-          if (onLocationChange) {
-            onLocationChange(latitude, longitude);
-          }
+          // Call debounced callback
+          debouncedLocationChange(latitude, longitude);
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -39,9 +56,8 @@ export function useUserLocation({ onLocationChange, onError }: UseUserLocationOp
           const defaultLon = 110.3695;
           setUserLocation([defaultLon, defaultLat]);
           
-          if (onLocationChange) {
-            onLocationChange(defaultLat, defaultLon);
-          }
+          // Call debounced callback
+          debouncedLocationChange(defaultLat, defaultLon);
         },
         {
           enableHighAccuracy: true,
@@ -62,14 +78,20 @@ export function useUserLocation({ onLocationChange, onError }: UseUserLocationOp
       const defaultLon = 110.3695;
       setUserLocation([defaultLon, defaultLat]);
       
-      if (onLocationChange) {
-        onLocationChange(defaultLat, defaultLon);
-      }
+      // Call debounced callback
+      debouncedLocationChange(defaultLat, defaultLon);
     }
-  }, [onLocationChange, onError]);
+  }, [debouncedLocationChange, onError]);
 
   useEffect(() => {
     requestLocation();
+    
+    // Cleanup debounce timer saat unmount
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, [requestLocation]);
 
   return { 

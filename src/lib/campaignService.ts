@@ -243,6 +243,52 @@ export async function getCampaignDetailsByReportIds(reportIds: number[]): Promis
 }
 
 /**
+ * Get campaign data by report IDs (combined hasCampaign + details)
+ * Returns hasCampaign boolean and campaign details (id, status) in single query
+ */
+export async function getCampaignDataByReportIds(reportIds: number[]): Promise<{
+  campaignMap: Map<number, boolean>;
+  campaignDetailsMap: Map<number, { id: number; status: string }>;
+}> {
+  try {
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('id, report_id, status, start_time, end_time')
+      .in('report_id', reportIds);
+
+    if (error) throw error;
+
+    // Initialize both maps
+    const campaignMap = new Map<number, boolean>();
+    const campaignDetailsMap = new Map<number, { id: number; status: string }>();
+    
+    // Set all report IDs to false initially
+    reportIds.forEach(id => campaignMap.set(id, false));
+    
+    if (data) {
+      data.forEach((campaign: { id: number; report_id: number; status: string; start_time: string; end_time: string }) => {
+        // Set hasCampaign to true
+        campaignMap.set(campaign.report_id, true);
+        
+        // Calculate actual status based on time
+        const actualStatus = determineCampaignStatus(campaign.start_time, campaign.end_time, campaign.status);
+        
+        // Set campaign details with calculated status
+        campaignDetailsMap.set(campaign.report_id, { id: campaign.id, status: actualStatus });
+      });
+    }
+
+    return { campaignMap, campaignDetailsMap };
+  } catch (error) {
+    console.error('Error fetching campaign data by report IDs:', error);
+    return { 
+      campaignMap: new Map(), 
+      campaignDetailsMap: new Map() 
+    };
+  }
+}
+
+/**
  * Determine campaign status based on current time
  */
 function determineCampaignStatus(startTime: string, endTime: string, dbStatus: string): 'upcoming' | 'ongoing' | 'finished' {

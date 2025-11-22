@@ -8,7 +8,7 @@ import {
   formatLocationCategory,
   formatDistance,
 } from '@/lib/nearbyReportsService';
-import { getCampaignsByReportIds, getCampaignDetailsByReportIds } from '@/lib/campaignService';
+import { getCampaignDataByReportIds } from '@/lib/campaignService';
 import { useUserLocation } from './useUserLocation';
 import { WasteMarker } from '.';
 
@@ -44,12 +44,16 @@ export function useDashboard() {
     onError: setError,
   });
 
-  // Fetch campaign status for reports
+  // Fetch campaigns for reports
   useEffect(() => {
     if (reports.length > 0) {
       const reportIds = reports.map(r => r.id);
-      getCampaignsByReportIds(reportIds).then(setCampaignMap);
-      getCampaignDetailsByReportIds(reportIds).then(setCampaignDetailsMap);
+      
+      // Single API call to get both hasCampaign and campaign details
+      getCampaignDataByReportIds(reportIds).then(({ campaignMap, campaignDetailsMap }) => {
+        setCampaignMap(campaignMap);
+        setCampaignDetailsMap(campaignDetailsMap);
+      });
     }
   }, [reports]);
 

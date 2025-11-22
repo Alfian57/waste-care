@@ -100,7 +100,27 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
     const newExp = currentExp + amount;
 
     // Verify we're updating the correct user (auth.uid() should match userId)
-    const { data: { session } } = await supabase.auth.getSession();
+    let session = null;
+    try {
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Session timeout')), 3000)
+      );
+      
+      const { data: { session: currentSession } } = await Promise.race([
+        sessionPromise,
+        timeoutPromise
+      ]) as any;
+      
+      session = currentSession;
+    } catch (sessionError) {
+      console.error('[EXP] Failed to get session:', sessionError);
+      return {
+        success: false,
+        error: 'Gagal mendapatkan session. Mohon login ulang.',
+      };
+    }
+    
     if (!session?.user?.id) {
       console.error('[EXP] No active session found');
       return {
@@ -249,13 +269,44 @@ export async function getUserExp(userId: string): Promise<number> {
 }
 
 /**
+ * Cache untuk profile checks (in-memory, per session)
+ * Prevents duplicate profile queries within same page load
+ */
+const profileExistsCache = new Map<string, { exists: boolean; timestamp: number }>();
+const CACHE_DURATION = 60000; // 1 minute
+
+/**
  * Memastikan profile user exists di database
  * Buat profile baru jika belum ada
+ * Uses in-memory cache to prevent duplicate queries
  */
 export async function ensureProfileExists(userId: string): Promise<boolean> {
   try {
-    // Get session to verify user
-    const { data: { session } } = await supabase.auth.getSession();
+    // Check cache first
+    const cached = profileExistsCache.get(userId);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.exists;
+    }
+
+    // Get session to verify user with timeout
+    let session = null;
+    try {
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Session timeout')), 3000)
+      );
+      
+      const { data: { session: currentSession } } = await Promise.race([
+        sessionPromise,
+        timeoutPromise
+      ]) as any;
+      
+      session = currentSession;
+    } catch (sessionError) {
+      console.error('[EXP] Failed to get session in ensureProfileExists:', sessionError);
+      return false;
+    }
+    
     if (!session?.user?.id) {
       console.error('[EXP] No active session for ensureProfileExists');
       return false;
@@ -279,8 +330,9 @@ export async function ensureProfileExists(userId: string): Promise<boolean> {
       return false;
     }
 
-    // If profile exists, return true
+    // If profile exists, cache and return true
     if (data) {
+      profileExistsCache.set(userId, { exists: true, timestamp: Date.now() });
       return true;
     }
 
@@ -294,16 +346,30 @@ export async function ensureProfileExists(userId: string): Promise<boolean> {
     if (insertError) {
       // Check if error is due to duplicate key (profile was created by another request)
       if (insertError.code === '23505') {
+        profileExistsCache.set(userId, { exists: true, timestamp: Date.now() });
         return true;
       }
       console.error('[EXP] Error creating profile:', insertError);
       return false;
     }
 
+    // Cache success
+    profileExistsCache.set(userId, { exists: true, timestamp: Date.now() });
     return true;
   } catch (error) {
     console.error('[EXP] Error in ensureProfileExists:', error);
     return false;
+  }
+}
+
+/**
+ * Clear profile exists cache (useful for testing or logout)
+ */
+export function clearProfileCache(userId?: string): void {
+  if (userId) {
+    profileExistsCache.delete(userId);
+  } else {
+    profileExistsCache.clear();
   }
 }
 

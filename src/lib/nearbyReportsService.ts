@@ -41,8 +41,24 @@ export async function getNearbyReports(
   try {
     const { latitude, longitude, radiusKm = 10, limit = 50 } = params;
 
-    // Get the session token
-    const { data: { session } } = await supabase.auth.getSession();
+    // Get the session token with timeout
+    let session = null;
+    try {
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Session timeout')), 3000)
+      );
+      
+      const { data: { session: currentSession } } = await Promise.race([
+        sessionPromise,
+        timeoutPromise
+      ]) as any;
+      
+      session = currentSession;
+    } catch (sessionError) {
+      console.warn('[NEARBY] Session retrieval failed, continuing without auth:', sessionError);
+      // Continue without session - endpoint is public
+    }
     
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (!supabaseUrl) {
@@ -67,12 +83,29 @@ export async function getNearbyReports(
     // Add authorization header if session exists (optional for this endpoint)
     if (session?.access_token) {
       headers['Authorization'] = `Bearer ${session.access_token}`;
+      headers['apikey'] = session.access_token;
     }
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers,
-    });
+    // Add timeout for fetch request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'GET',
+        headers,
+        signal: controller.signal,
+        mode: 'cors',
+      });
+      clearTimeout(timeoutId);
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        throw new Error('Request timeout. Mohon coba lagi.');
+      }
+      throw new Error('Gagal menghubungi server. Periksa koneksi internet Anda.');
+    }
 
     if (!response.ok) {
       const errorText = await response.text();

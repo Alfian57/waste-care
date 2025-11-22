@@ -4,7 +4,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { ensureProfileExists } from '@/lib/expService';
+import { ensureProfileExists, clearProfileCache } from '@/lib/expService';
+import { clearCampaignsCache } from '@/hooks/useCampaigns';
 
 interface AuthContextType {
   user: User | null;
@@ -33,30 +34,72 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isPublicRoute = publicRoutes.some(route => pathname?.startsWith(route));
 
   useEffect(() => {
-    // Get initial session
+    // Get initial session with retry
     const getInitialSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-        
-        // Ensure profile exists when user is authenticated
-        if (session?.user) {
-          await ensureProfileExists(session.user.id);
+      let retries = 2;
+      
+      while (retries > 0) {
+        try {
+          // Add timeout for session retrieval
+          const sessionPromise = supabase.auth.getSession();
+          const timeoutPromise = new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Session timeout')), 5000)
+          );
+          
+          const { data: { session }, error } = await Promise.race([
+            sessionPromise,
+            timeoutPromise
+          ]) as any;
+          
+          if (error) {
+            console.error('[AUTH] Session error:', error);
+            throw error;
+          }
+          
+          setUser(session?.user ?? null);
+          
+          // Ensure profile exists when user is authenticated
+          if (session?.user) {
+            try {
+              await ensureProfileExists(session.user.id);
+            } catch (profileError) {
+              console.error('[AUTH] Profile creation failed:', profileError);
+              // Don't block auth flow if profile creation fails
+            }
+          }
+          
+          // Redirect logic after getting session
+          if (!session?.user && !isPublicRoute) {
+            // Not logged in and trying to access protected route
+            router.push('/login');
+          } else if (session?.user && (pathname === '/login' || pathname === '/register')) {
+            // Logged in and trying to access auth pages
+            router.push('/dashboard');
+          }
+          
+          // Success - break retry loop
+          break;
+        } catch (error) {
+          console.error(`[AUTH] Error getting session (${retries} retries left):`, error);
+          retries--;
+          
+          if (retries === 0) {
+            // All retries failed
+            console.error('[AUTH] Failed to get session after retries');
+            setUser(null);
+            
+            // Redirect to login if not on public route
+            if (!isPublicRoute) {
+              router.push('/login');
+            }
+          } else {
+            // Wait before retry
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
         }
-        
-        // Redirect logic after getting session
-        if (!session?.user && !isPublicRoute) {
-          // Not logged in and trying to access protected route
-          router.push('/login');
-        } else if (session?.user && (pathname === '/login' || pathname === '/register')) {
-          // Logged in and trying to access auth pages
-          router.push('/dashboard');
-        }
-      } catch (error) {
-        console.error('Error getting session:', error);
-      } finally {
-        setLoading(false);
       }
+      
+      setLoading(false);
     };
 
     getInitialSession();
@@ -74,6 +117,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Handle auth state changes
         if (event === 'SIGNED_OUT') {
+          // Clear all caches on logout
+          clearProfileCache();
+          clearCampaignsCache();
           router.push('/login');
         } else if (event === 'SIGNED_IN' && isPublicRoute) {
           router.push('/dashboard');

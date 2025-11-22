@@ -40,19 +40,84 @@ interface SubmitReportResponse {
 }
 
 export async function submitReport(params: SubmitReportParams): Promise<SubmitReportResponse> {
-  try {
+  // Retry logic - try up to 2 times
+  let lastError: Error | null = null;
+  
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      console.log(`[REPORT] Attempt ${attempt}/2`);
+      return await submitReportInternal(params);
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`[REPORT] Attempt ${attempt} failed:`, lastError.message);
+      
+      // Don't retry for certain errors
+      if (
+        lastError.message.includes('Session expired') ||
+        lastError.message.includes('Ukuran gambar terlalu besar') ||
+        lastError.message.includes('tidak terdeteksi sebagai sampah') ||
+        lastError.message.includes('login')
+      ) {
+        throw lastError;
+      }
+      
+      // Wait before retry (only on first attempt)
+      if (attempt === 1) {
+        console.log('[REPORT] Retrying in 2 seconds...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+  
+  // All attempts failed
+  throw lastError || new Error('Upload failed after 2 attempts');
+}
 
-    // Get the session token
-    const { data: { session } } = await supabase.auth.getSession();
+async function submitReportInternal(params: SubmitReportParams): Promise<SubmitReportResponse> {
+  try {
+    // Validate image size (max 10MB base64)
+    const imageSizeInBytes = (params.imageBase64.length * 3) / 4;
+    const imageSizeInMB = imageSizeInBytes / (1024 * 1024);
     
-    if (!session) {
-      throw new Error('No active session. Please login first.');
+    console.log(`[REPORT] Image size: ${imageSizeInMB.toFixed(2)} MB`);
+    
+    if (imageSizeInMB > 10) {
+      throw new Error(`Ukuran gambar terlalu besar (${imageSizeInMB.toFixed(1)} MB). Maksimal 10 MB.`);
+    }
+
+    // Get session with timeout (5 seconds)
+    console.log('[REPORT] Getting session...');
+    
+    let session;
+    try {
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Session timeout')), 5000)
+      );
+      
+      const { data: { session: currentSession }, error: sessionError } = await Promise.race([
+        sessionPromise,
+        timeoutPromise
+      ]) as any;
+      
+      if (sessionError || !currentSession) {
+        console.error('[REPORT] Session error:', sessionError);
+        throw new Error('No active session. Please login again.');
+      }
+      
+      session = currentSession;
+      console.log('[REPORT] Session retrieved successfully');
+    } catch (sessionErr) {
+      console.error('[REPORT] Failed to get session:', sessionErr);
+      throw new Error('Gagal mendapatkan session. Mohon login kembali.');
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (!supabaseUrl) {
       throw new Error('Missing Supabase URL configuration');
     }
+    
+    console.log('[REPORT] Preparing request...');
 
     const requestBody = {
       image_base64: params.imageBase64,
@@ -65,33 +130,71 @@ export async function submitReport(params: SubmitReportParams): Promise<SubmitRe
       ...(params.locationCategory && { location_category: params.locationCategory }),
     };
 
-    // Call the edge function
-    const response = await fetch(
-      `${supabaseUrl}/functions/v1/submit-report`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
+    // Call the edge function with proper error handling
+    console.log('[REPORT] Sending request to edge function...');
+    
+    let response: Response;
+    try {
+      // Configure fetch with proper options
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 85000); // 85 seconds
+      
+      response = await fetch(
+        `${supabaseUrl}/functions/v1/submit-report`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+            'apikey': session.access_token, // Add apikey header for Supabase
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+          // Remove keepalive as it can cause issues in some browsers
+          mode: 'cors',
+          credentials: 'same-origin',
+        }
+      );
+      
+      clearTimeout(timeoutId);
+    } catch (fetchError: any) {
+      console.error('[REPORT] Fetch error:', fetchError);
+      
+      // Handle specific fetch errors
+      if (fetchError.name === 'AbortError') {
+        throw new Error('Request timeout setelah 85 detik. Server mungkin sedang sibuk, coba lagi.');
       }
-    );
-
+      
+      if (fetchError instanceof TypeError) {
+        // TypeError usually means CORS, network, or invalid URL
+        console.error('[REPORT] TypeError details:', fetchError.message);
+        throw new Error('Gagal terhubung ke server. Mohon coba lagi dalam beberapa saat.');
+      }
+      
+      throw new Error('Koneksi ke server gagal. Mohon coba lagi.');
+    }
+    
+    console.log('[REPORT] Response received, status:', response.status);
     
     const responseText = await response.text();
+    console.log('[REPORT] Response text length:', responseText.length);
     
     let data: SubmitReportResponse;
     try {
       data = JSON.parse(responseText);
+      console.log('[REPORT] Parsed response:', { success: data.success, hasData: !!data.data });
     } catch (e) {
-      console.error('Failed to parse response:', e);
-      throw new Error(`Server returned invalid JSON: ${responseText.substring(0, 200)}`);
+      console.error('[REPORT] Failed to parse response:', e);
+      console.error('[REPORT] Response text:', responseText.substring(0, 500));
+      throw new Error(`Server error. Response tidak valid. Status: ${response.status}`);
     }
     
     if (!response.ok) {
+      console.error('[REPORT] Request failed:', response.status, data);
       return data;
     }
+    
+    console.log('[REPORT] Upload successful!');
 
     // Jika report berhasil dibuat, tambahkan EXP ke user
     if (data.success && session.user?.id) {
@@ -109,7 +212,7 @@ export async function submitReport(params: SubmitReportParams): Promise<SubmitRe
 
     return data;
   } catch (error) {
-    console.error('Error submitting report:', error);
+    console.error('[REPORT] Error in submitReportInternal:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -140,8 +243,22 @@ export function fileToBase64(file: File): Promise<string> {
 /**
  * Resize and compress image before upload
  */
-export function resizeImage(file: File, maxWidth: number = 1024, maxHeight: number = 1024): Promise<string> {
+export function resizeImage(file: File, maxWidth: number = 800, maxHeight: number = 800): Promise<string> {
   return new Promise((resolve, reject) => {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('File harus berupa gambar'));
+      return;
+    }
+    
+    // Validate file size (max 50MB original)
+    if (file.size > 50 * 1024 * 1024) {
+      reject(new Error('Ukuran file terlalu besar. Maksimal 50 MB'));
+      return;
+    }
+    
+    console.log(`[RESIZE] Original file: ${file.name}, size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+    
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (event) => {
@@ -151,6 +268,8 @@ export function resizeImage(file: File, maxWidth: number = 1024, maxHeight: numb
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
+        
+        console.log(`[RESIZE] Original dimensions: ${width}x${height}`);
 
         // Calculate new dimensions
         if (width > height) {
@@ -164,19 +283,29 @@ export function resizeImage(file: File, maxWidth: number = 1024, maxHeight: numb
             height = maxHeight;
           }
         }
+        
+        console.log(`[RESIZE] New dimensions: ${Math.round(width)}x${Math.round(height)}`);
 
         canvas.width = width;
         canvas.height = height;
 
         const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
+        if (!ctx) {
+          reject(new Error('Gagal memproses gambar'));
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to base64 with compression
-        const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+        // Convert to base64 with higher compression (0.7 instead of 0.8)
+        const base64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+        const sizeInMB = (base64.length * 3 / 4) / (1024 * 1024);
+        console.log(`[RESIZE] Compressed size: ${sizeInMB.toFixed(2)} MB`);
+        
         resolve(base64);
       };
-      img.onerror = reject;
+      img.onerror = () => reject(new Error('Gagal memuat gambar'));
     };
-    reader.onerror = reject;
+    reader.onerror = () => reject(new Error('Gagal membaca file'));
   });
 }
