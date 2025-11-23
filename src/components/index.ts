@@ -8,7 +8,7 @@ export { default as GoogleButton } from './ui/GoogleButton';
 // Shared Components
 export { default as BottomNavigation } from './shared/BottomNavigation';
 export { default as BottomSheet } from './shared/BottomSheet';
-export { default as MapTilerMap } from './shared/MapTilerMap';
+export { default as MapTilerMap } from './shared/LazyMapTilerMap';
 export { default as DetailItem } from './shared/DetailItem';
 export { default as PWAInstallPrompt } from './shared/PWAInstallPrompt';
 export { PermissionGuard } from './shared/PermissionGuard';

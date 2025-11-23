@@ -43,7 +43,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // Add timeout for session retrieval
           const sessionPromise = supabase.auth.getSession();
           const timeoutPromise = new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Session timeout')), 5000)
+            setTimeout(() => reject(new Error('Session timeout')), 3000) // Reduced from 5s to 3s
           );
           
           const { data: { session }, error } = await Promise.race([
@@ -58,14 +58,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           setUser(session?.user ?? null);
           
-          // Ensure profile exists when user is authenticated
+          // Ensure profile exists when user is authenticated (non-blocking)
           if (session?.user) {
-            try {
-              await ensureProfileExists(session.user.id);
-            } catch (profileError) {
-              console.error('[AUTH] Profile creation failed:', profileError);
-              // Don't block auth flow if profile creation fails
-            }
+            // Don't await - let it run in background
+            ensureProfileExists(session.user.id).catch(err => {
+              console.error('[AUTH] Profile creation failed:', err);
+            });
           }
           
           // Redirect logic after getting session

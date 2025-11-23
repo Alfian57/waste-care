@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components";
 import { ProtectedRoute } from "@/components";
-import { ReportProvider } from "@/contexts/ReportContext";
-import { RevalidationProvider } from "@/contexts/RevalidationContext";
+import { ClientProviders } from "@/components/providers/ClientProviders";
+import { AsyncStyleLoader } from "@/components/shared/AsyncStyleLoader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -80,14 +80,27 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to external domains for faster loading */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://api.maptiler.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        <link rel="dns-prefetch" href="https://api.maptiler.com" />
+        
+        {/* Preload critical resources */}
+        <link 
+          rel="preload" 
+          href="https://cdn.jsdelivr.net/npm/@vetixy/circular-std@1.0.0/dist/index.min.css" 
+          as="style" 
+        />
+      </head>
       <body className="antialiased" suppressHydrationWarning>
+        <AsyncStyleLoader />
         <AuthProvider>
           <ProtectedRoute>
-            <ReportProvider>
-              <RevalidationProvider>
-                {children}
-              </RevalidationProvider>
-            </ReportProvider>
+            <ClientProviders>
+              {children}
+            </ClientProviders>
           </ProtectedRoute>
         </AuthProvider>
       </body>
