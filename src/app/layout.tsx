@@ -87,12 +87,45 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link rel="dns-prefetch" href="https://api.maptiler.com" />
         
-        {/* Preload critical resources */}
+        {/* Preload critical font with font-display: swap */}
         <link 
           rel="preload" 
-          href="https://cdn.jsdelivr.net/npm/@vetixy/circular-std@1.0.0/dist/index.min.css" 
-          as="style" 
+          href="https://cdn.jsdelivr.net/npm/@vetixy/circular-std@1.0.0/dist/CircularStd-Book.woff2" 
+          as="font" 
+          type="font/woff2"
+          crossOrigin="anonymous"
         />
+        
+        {/* Inline critical font CSS to avoid render blocking */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          @font-face {
+            font-family: 'CircularStd';
+            src: url('https://cdn.jsdelivr.net/npm/@vetixy/circular-std@1.0.0/dist/CircularStd-Book.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+          }
+        `}} />
+        
+        {/* Back/Forward Cache restoration support */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+              console.log('Page restored from bfcache');
+              // Refresh dynamic content if needed
+              if (window.location.pathname.includes('/dashboard') || 
+                  window.location.pathname.includes('/campaign') ||
+                  window.location.pathname.includes('/leaderboard')) {
+                window.location.reload();
+              }
+            }
+          });
+          
+          // Mark page as bfcache-eligible
+          window.addEventListener('pagehide', function(event) {
+            // Allow bfcache by not having any blocking operations
+          });
+        `}} />
       </head>
       <body className="antialiased" suppressHydrationWarning>
         <AsyncStyleLoader />

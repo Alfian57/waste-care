@@ -1,13 +1,25 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 /**
- * Load external CSS asynchronously to prevent render blocking
+ * Load external CSS asynchronously only when needed
+ * Reduces unused CSS by loading MapTiler styles only on map pages
  */
 export function AsyncStyleLoader() {
+  const pathname = usePathname();
+  
   useEffect(() => {
-    // Load MapTiler SDK CSS only when needed
+    // Only load MapTiler CSS on pages that actually use maps
+    const needsMapStyles = pathname === '/dashboard' || 
+                          pathname === '/landing' || 
+                          pathname?.startsWith('/landing');
+    
+    if (!needsMapStyles) {
+      return;
+    }
+    
     const loadStyle = (href: string, id: string) => {
       if (document.getElementById(id)) return;
       
@@ -23,16 +35,15 @@ export function AsyncStyleLoader() {
       document.head.appendChild(link);
     };
 
+    // Load MapTiler CSS only when on map pages
     loadStyle(
       'https://cdn.jsdelivr.net/npm/@maptiler/sdk@latest/dist/maptiler-sdk.css',
       'maptiler-css'
     );
     
-    loadStyle(
-      'https://cdn.jsdelivr.net/npm/@vetixy/circular-std@1.0.0/dist/index.min.css',
-      'circular-font-css'
-    );
-  }, []);
+    // Load map-specific styles
+    loadStyle('/map-styles.css', 'map-styles');
+  }, [pathname]);
 
   return null;
 }

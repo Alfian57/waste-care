@@ -2,10 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { User } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { ensureProfileExists, clearProfileCache } from '@/lib/expService';
-import { clearCampaignsCache } from '@/hooks/useCampaigns';
 
 interface AuthContextType {
   user: User | null;
@@ -58,11 +56,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           setUser(session?.user ?? null);
           
-          // Ensure profile exists when user is authenticated (non-blocking)
+          // Ensure profile exists when user is authenticated (lazy load service)
           if (session?.user) {
-            // Don't await - let it run in background
-            ensureProfileExists(session.user.id).catch(err => {
-              console.error('[AUTH] Profile creation failed:', err);
+            // Lazy load expService only when needed
+            import('@/lib/expService').then(({ ensureProfileExists }) => {
+              ensureProfileExists(session.user.id).catch(err => {
+                console.error('[AUTH] Profile creation failed:', err);
+              });
             });
           }
           
@@ -108,16 +108,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Ensure profile exists when user signs in
+        // Lazy load services only when needed
         if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
-          await ensureProfileExists(session.user.id);
+          import('@/lib/expService').then(({ ensureProfileExists }) => {
+            ensureProfileExists(session.user.id);
+          });
         }
 
         // Handle auth state changes
         if (event === 'SIGNED_OUT') {
-          // Clear all caches on logout
-          clearProfileCache();
-          clearCampaignsCache();
+          // Clear all caches on logout (lazy load)
+          Promise.all([
+            import('@/lib/expService').then(m => m.clearProfileCache()),
+            import('@/hooks/useCampaigns').then(m => m.clearCampaignsCache())
+          ]);
           router.push('/login');
         } else if (event === 'SIGNED_IN' && isPublicRoute) {
           router.push('/dashboard');
