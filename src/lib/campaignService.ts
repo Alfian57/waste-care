@@ -35,7 +35,7 @@ export async function fetchCampaigns(userId?: string): Promise<Campaign[]> {
         *,
         campaign_participants(profile_id)
       `)
-      .order('start_time', { ascending: true}) as { data: any[] | null; error: any };
+      .order('start_time', { ascending: false }) as { data: any[] | null; error: any };
 
     if (error) throw error;
 
