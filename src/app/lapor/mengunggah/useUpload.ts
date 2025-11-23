@@ -51,10 +51,10 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
         notes: reportData.notes || '',
       };
 
-      // Add timeout for submit report (90 seconds for AI processing)
+      // Add timeout for submit report (120 seconds for AI processing)
       const submitPromise = submitReport(submitParams);
       const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout setelah 90 detik. Mohon periksa koneksi internet Anda dan coba lagi.')), 90000)
+        setTimeout(() => reject(new Error('Request timeout setelah 120 detik. Server mungkin sedang sibuk, coba lagi nanti.')), 120000)
       );
       
       const result = await Promise.race([submitPromise, timeoutPromise]);
@@ -72,6 +72,13 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
 
       // Check if upload was successful
       if (!result.success) {
+        // Handle AI timeout or response too long
+        if (result.error?.includes('AI_RESPONSE_TOO_LONG') || result.error?.includes('response too long')) {
+          throw new Error(
+            'Server sedang memproses terlalu lama. Ini biasanya terjadi saat server sibuk.\n\nSilakan coba lagi dalam beberapa saat.'
+          );
+        }
+        
         // Handle validation failure (not waste)
         if (result.validation && !result.validation.isWaste) {
           const reason = result.validation.reason || 'Gambar tidak terdeteksi sebagai sampah';
@@ -141,8 +148,6 @@ export function useUpload({ reportData, setAiValidation }: UseUploadProps) {
         clearInterval(completeProgress);
         completeProgress = null;
       }
-      
-      console.error('Upload error:', err);
       
       // Provide more user-friendly error messages
       let errorMessage = 'Terjadi kesalahan saat mengunggah';

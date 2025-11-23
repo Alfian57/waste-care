@@ -20,7 +20,6 @@ export default function DebugDistributionPage() {
       const total = data.reduce((sum, item) => sum + item.report_count, 0);
       setTotalReports(total);
     } catch (error) {
-      console.error('Error loading distribution:', error);
     } finally {
       setLoading(false);
     }

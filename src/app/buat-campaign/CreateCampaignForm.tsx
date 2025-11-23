@@ -136,7 +136,6 @@ export default function CreateCampaignForm() {
       // Success - redirect to campaign page
       router.push('/campaign');
     } catch (err) {
-      console.error('Error creating campaign:', err);
       setError(err instanceof Error ? err.message : 'Gagal membuat campaign');
     } finally {
       setLoading(false);

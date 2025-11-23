@@ -43,7 +43,6 @@ export function useUserLocation({ onLocationChange, onError }: UseUserLocationOp
           debouncedLocationChange(latitude, longitude);
         },
         (error) => {
-          console.error('Error getting location:', error);
           const errorMessage = getGeolocationErrorMessage(error);
           setIsRequestingLocation(false);
           

@@ -170,7 +170,6 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
 
       // Handle map errors
       mapInstance.on('error', (e) => {
-        console.error('Map error:', e);
         const errorMsg = isOnline 
           ? 'Terjadi kesalahan saat memuat peta. Silakan refresh halaman.'
           : 'Tidak ada koneksi internet. Peta tidak dapat dimuat.';
@@ -181,11 +180,9 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
 
       // Handle style load errors (e.g., tiles not loading)
       mapInstance.on('styleimagemissing', () => {
-        console.warn('Map style image missing');
       });
 
     } catch (error) {
-      console.error('Error initializing map:', error);
       const errorMsg = 'Gagal menginisialisasi peta. Silakan refresh halaman.';
       setMapError(errorMsg);
       setIsLoading(false);
@@ -197,7 +194,6 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
         try {
           map.current.remove();
         } catch (error) {
-          console.error('Error removing map:', error);
         }
         map.current = null;
       }
@@ -211,7 +207,6 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
     try {
       map.current.setCenter(center);
     } catch (error) {
-      console.error('Error updating map center:', error);
     }
   }, [center, isLoading]);
 
@@ -225,7 +220,6 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
         try {
           marker.remove();
         } catch (error) {
-          console.error('Error removing marker:', error);
         }
       });
       markersRef.current = [];
@@ -282,12 +276,10 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
             
             markersRef.current.push(marker);
           } catch (error) {
-            console.error('Error adding marker:', error);
           }
         }
       });
     } catch (error) {
-      console.error('Error updating markers:', error);
     }
   }, [markers, isLoading]);
 
@@ -340,7 +332,6 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
     };
 
     const handleLocationError = (error: GeolocationPositionError) => {
-      console.warn('Geolocation error:', error.message);
       // Don't show error to user, just skip showing location marker
     };
 
@@ -435,7 +426,6 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
       
       userLocationMarkerRef.current = marker;
     } catch (error) {
-      console.error('Error adding user location marker:', error);
     }
 
     return () => {
@@ -445,7 +435,6 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
           userLocationMarkerRef.current.remove();
           userLocationMarkerRef.current = null;
         } catch (error) {
-          console.error('Error removing user location marker:', error);
         }
       }
     };
@@ -477,7 +466,6 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
         const data = await response.json();
 
         if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
-          console.error('No route found');
           return;
         }
 
@@ -492,7 +480,6 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
           addRouteToMap(route);
         }
       } catch (error) {
-        console.error('Error fetching route:', error);
       }
     };
 

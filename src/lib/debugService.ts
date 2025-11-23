@@ -19,7 +19,6 @@ export async function fetchReportsDistribution(): Promise<ReportDistribution[]> 
       .rpc('get_reports_distribution') as any;
 
     if (error) {
-      console.error('Error fetching reports distribution:', error);
       throw error;
     }
 
@@ -33,7 +32,6 @@ export async function fetchReportsDistribution(): Promise<ReportDistribution[]> 
       max_lng: Number(item.max_lng),
     }));
   } catch (error) {
-    console.error('Error fetching reports distribution:', error);
     return [];
   }
 }

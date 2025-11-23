@@ -39,7 +39,6 @@ export function usePhotoManagement({
         setPhotos(prev => [...prev, `data:image/jpeg;base64,${base64}`]);
       }
     } catch (error) {
-      console.error('Error processing images:', error);
       throw new Error('Gagal memproses gambar. Silakan coba lagi.');
     } finally {
       setLoading(false);

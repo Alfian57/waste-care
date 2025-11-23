@@ -59,7 +59,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
     // First, ensure profile exists
     const profileExists = await ensureProfileExists(userId);
     if (!profileExists) {
-      console.error('[EXP] Failed to ensure profile exists');
       return {
         success: false,
         error: 'Gagal memastikan profil user ada',
@@ -74,13 +73,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
       .single();
 
     if (fetchError) {
-      console.error('[EXP] Error fetching user profile:', fetchError);
-      console.error('[EXP] Fetch error details:', {
-        code: fetchError.code,
-        message: fetchError.message,
-        details: fetchError.details,
-        hint: fetchError.hint,
-      });
       return {
         success: false,
         error: `Gagal mengambil data profil user: ${fetchError.message}`,
@@ -88,7 +80,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
     }
 
     if (!profile) {
-      console.error('[EXP] Profile not found after ensureProfileExists');
       return {
         success: false,
         error: 'Profil user tidak ditemukan',
@@ -114,7 +105,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
       
       session = currentSession;
     } catch (sessionError) {
-      console.error('[EXP] Failed to get session:', sessionError);
       return {
         success: false,
         error: 'Gagal mendapatkan session. Mohon login ulang.',
@@ -122,7 +112,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
     }
     
     if (!session?.user?.id) {
-      console.error('[EXP] No active session found');
       return {
         success: false,
         error: 'Tidak ada sesi aktif',
@@ -130,7 +119,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
     }
 
     if (session.user.id !== userId) {
-      console.error('[EXP] Session user ID does not match target user ID');
       return {
         success: false,
         error: 'User ID tidak cocok dengan sesi',
@@ -148,13 +136,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
       .select();
 
     if (updateError) {
-      console.error('[EXP] Error updating user exp:', updateError);
-      console.error('[EXP] Update error details:', {
-        code: updateError.code,
-        message: updateError.message,
-        details: updateError.details,
-        hint: updateError.hint,
-      });
       return {
         success: false,
         error: `Gagal mengupdate EXP user: ${updateError.message}`,
@@ -162,7 +143,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
     }
 
     if (!updateResult || updateResult.length === 0) {
-      console.error('[EXP] Update returned no rows');
       return {
         success: false,
         error: 'Update tidak mempengaruhi row manapun',
@@ -174,7 +154,6 @@ export async function addExpToUser(params: AddExpParams): Promise<AddExpResult> 
       newExp,
     };
   } catch (error) {
-    console.error('[EXP] Error in addExpToUser:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -234,13 +213,11 @@ export async function getUserExp(userId: string): Promise<number> {
     // Get session to verify user
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user?.id) {
-      console.error('[EXP] No active session for getUserExp');
       return 0;
     }
 
     // Verify session user matches target user
     if (session.user.id !== userId) {
-      console.error('[EXP] Session user ID does not match target user ID in getUserExp');
       return 0;
     }
 
@@ -251,7 +228,6 @@ export async function getUserExp(userId: string): Promise<number> {
       .maybeSingle();
 
     if (error) {
-      console.error('[EXP] Error fetching user exp:', error);
       return 0;
     }
 
@@ -263,7 +239,6 @@ export async function getUserExp(userId: string): Promise<number> {
     // @ts-expect-error - Supabase type inference issue
     return data.exp || 0;
   } catch (error) {
-    console.error('[EXP] Error in getUserExp:', error);
     return 0;
   }
 }
@@ -303,18 +278,15 @@ export async function ensureProfileExists(userId: string): Promise<boolean> {
       
       session = currentSession;
     } catch (sessionError) {
-      console.error('[EXP] Failed to get session in ensureProfileExists:', sessionError);
       return false;
     }
     
     if (!session?.user?.id) {
-      console.error('[EXP] No active session for ensureProfileExists');
       return false;
     }
 
     // Verify session user matches target user
     if (session.user.id !== userId) {
-      console.error('[EXP] Session user ID does not match target user ID in ensureProfileExists');
       return false;
     }
     
@@ -326,7 +298,6 @@ export async function ensureProfileExists(userId: string): Promise<boolean> {
       .maybeSingle();
 
     if (error && error.code !== 'PGRST116') {
-      console.error('[EXP] Error checking profile:', error);
       return false;
     }
 
@@ -349,7 +320,6 @@ export async function ensureProfileExists(userId: string): Promise<boolean> {
         profileExistsCache.set(userId, { exists: true, timestamp: Date.now() });
         return true;
       }
-      console.error('[EXP] Error creating profile:', insertError);
       return false;
     }
 
@@ -357,7 +327,6 @@ export async function ensureProfileExists(userId: string): Promise<boolean> {
     profileExistsCache.set(userId, { exists: true, timestamp: Date.now() });
     return true;
   } catch (error) {
-    console.error('[EXP] Error in ensureProfileExists:', error);
     return false;
   }
 }

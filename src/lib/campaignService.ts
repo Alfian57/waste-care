@@ -49,7 +49,6 @@ export async function fetchCampaigns(userId?: string): Promise<Campaign[]> {
       .rpc('get_reports_with_coordinates') as any;
     
     if (reportsError) {
-      console.error('Error fetching report coordinates:', reportsError);
     }
 
     // Create a map of report_id to report data
@@ -79,7 +78,6 @@ export async function fetchCampaigns(userId?: string): Promise<Campaign[]> {
 
     return transformedCampaigns;
   } catch (error) {
-    console.error('Error fetching campaigns:', error);
     throw new Error('Gagal memuat data campaign');
   }
 }
@@ -137,12 +135,10 @@ export async function joinCampaign(campaignId: number, userId: string): Promise<
       }
     } catch (expError) {
       // Log error tapi tidak gagalkan proses join campaign
-      console.error('[CAMPAIGN] Exception while adding EXP for joining campaign:', expError);
     }
 
     return true;
   } catch (error) {
-    console.error('Error joining campaign:', error);
     throw error;
   }
 }
@@ -162,7 +158,6 @@ export async function leaveCampaign(campaignId: number, userId: string): Promise
 
     return true;
   } catch (error) {
-    console.error('Error leaving campaign:', error);
     throw error;
   }
 }
@@ -182,7 +177,6 @@ export async function checkReportHasCampaign(reportId: number): Promise<boolean>
 
     return data && data.length > 0;
   } catch (error) {
-    console.error('Error checking report campaign:', error);
     return false;
   }
 }
@@ -210,7 +204,6 @@ export async function getCampaignsByReportIds(reportIds: number[]): Promise<Map<
 
     return campaignMap;
   } catch (error) {
-    console.error('Error fetching campaigns by report IDs:', error);
     return new Map();
   }
 }
@@ -237,7 +230,6 @@ export async function getCampaignDetailsByReportIds(reportIds: number[]): Promis
 
     return campaignDetailsMap;
   } catch (error) {
-    console.error('Error fetching campaign details by report IDs:', error);
     return new Map();
   }
 }
@@ -280,7 +272,6 @@ export async function getCampaignDataByReportIds(reportIds: number[]): Promise<{
 
     return { campaignMap, campaignDetailsMap };
   } catch (error) {
-    console.error('Error fetching campaign data by report IDs:', error);
     return { 
       campaignMap: new Map(), 
       campaignDetailsMap: new Map() 
@@ -412,14 +403,12 @@ function formatWasteVolume(volume: string): string {
 export async function generateCampaignFromNearbyReports(
   params: CreateCampaignParams
 ): Promise<Campaign | null> {
-  console.warn('generateCampaignFromNearbyReports is deprecated with new schema');
   return null;
   
   // try {
   //   const { latitude, longitude, radiusKm } = params;
   //   // Implementation needs to be updated for new schema
   // } catch (error) {
-  //   console.error('Error generating campaign:', error);
   //   return null;
   // }
 }
@@ -430,7 +419,6 @@ export async function generateCampaignFromNearbyReports(
  * Gunakan data dari database.
  */
 export function getSampleCampaigns(): Campaign[] {
-  console.warn('getSampleCampaigns is deprecated, use fetchCampaigns instead');
   return [];
 }
 

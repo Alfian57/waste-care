@@ -56,7 +56,6 @@ export async function getNearbyReports(
       
       session = currentSession;
     } catch (sessionError) {
-      console.warn('[NEARBY] Session retrieval failed, continuing without auth:', sessionError);
       // Continue without session - endpoint is public
     }
     
@@ -109,7 +108,6 @@ export async function getNearbyReports(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Nearby reports request failed:', response.status, errorText);
       throw new Error(`Failed to fetch nearby reports: ${response.statusText}`);
     }
 
@@ -119,14 +117,11 @@ export async function getNearbyReports(
     try {
       data = JSON.parse(responseText);
     } catch (e) {
-      console.error('Failed to parse response:', e);
-      console.error('Response text:', responseText.substring(0, 200));
       throw new Error(`Server returned invalid JSON: ${responseText.substring(0, 200)}`);
     }
 
     return data;
   } catch (error) {
-    console.error('Error fetching nearby reports:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',

@@ -98,7 +98,6 @@ export function useRegister() {
         }, 3000);
       }
     } catch (error) {
-      console.error('Registration error:', error);
       setErrors({ email: 'Terjadi kesalahan. Silakan coba lagi.' });
     } finally {
       setLoading(false);
@@ -111,12 +110,10 @@ export function useRegister() {
       const { error } = await loginWithGoogle();
 
       if (error) {
-        console.error('Google signup error:', error);
         setErrors({ email: getErrorMessage(error) });
       }
       // If successful, user will be redirected by Supabase to the callback URL
     } catch (error) {
-      console.error('Google signup error:', error);
       setErrors({ email: 'Terjadi kesalahan. Silakan coba lagi.' });
     }
   };

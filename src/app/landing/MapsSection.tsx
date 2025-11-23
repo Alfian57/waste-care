@@ -54,7 +54,6 @@ export default function MapsSection() {
           setStats(wasteStats);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
       } finally {
         if (isMounted) {
           setLoading(false);

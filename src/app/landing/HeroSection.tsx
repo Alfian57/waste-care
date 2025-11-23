@@ -36,7 +36,6 @@ export default function HeroSection() {
       setOverallStats(stats);
       setWasteStats(waste);
     } catch (error) {
-      console.error('Error loading statistics:', error);
     } finally {
       setLoading(false);
     }

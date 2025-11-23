@@ -13,14 +13,14 @@ export function middleware(request: NextRequest) {
   // Block third-party cookies and restrict external resources
   response.headers.set('Permissions-Policy', 'interest-cohort=(), browsing-topics=()');
   
-  // Content Security Policy to block third-party cookies
+  // Content Security Policy to block third-party cookies but allow necessary APIs
   const cspHeader = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net",
     "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
     "img-src 'self' data: blob: https: http:",
     "font-src 'self' data: https://cdn.jsdelivr.net",
-    "connect-src 'self' https://api.maptiler.com https://*.supabase.co",
+    "connect-src 'self' https://api.maptiler.com https://*.supabase.co https://qiojwyubnqwjxgzolzwo.supabase.co https://router.project-osrm.org",
     "frame-src 'self'",
     "media-src 'self' blob:",
     "worker-src 'self' blob:",

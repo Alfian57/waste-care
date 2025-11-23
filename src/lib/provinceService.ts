@@ -31,13 +31,11 @@ export async function getTopProvinces(limit: number = 5): Promise<ProvinceStatis
       .rpc('get_province_statistics', { limit_count: limit } as any);
 
     if (error) {
-      console.error('Error fetching province statistics:', error);
       throw error;
     }
 
     return data || [];
   } catch (error) {
-    console.error('Error in getTopProvinces:', error);
     throw error;
   }
 }
@@ -54,13 +52,11 @@ export async function getReportsForMap(limit: number = 100): Promise<MapReport[]
       .limit(limit);
 
     if (error) {
-      console.error('Error fetching reports:', error);
       throw error;
     }
 
     return (data || []) as MapReport[];
   } catch (error) {
-    console.error('Error in getReportsForMap:', error);
     throw error;
   }
 }

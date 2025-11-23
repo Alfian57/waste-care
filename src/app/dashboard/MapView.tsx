@@ -44,7 +44,6 @@ export default function MapView({
   }, []);
 
   const handleMapError = useCallback((error: Error) => {
-    console.error('Map error:', error);
   }, []);
 
   return (

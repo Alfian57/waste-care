@@ -74,7 +74,6 @@ export async function fetchWasteTypeStatistics(): Promise<WasteTypeStatistics> {
       .single() as any;
 
     if (error) {
-      console.error('Error fetching waste type statistics:', error);
       throw error;
     }
 
@@ -86,7 +85,6 @@ export async function fetchWasteTypeStatistics(): Promise<WasteTypeStatistics> {
       mixed: Number(data?.mixed || 0),
     };
   } catch (error) {
-    console.error('Error fetching waste type statistics:', error);
     return {
       total: 0,
       organic: 0,
@@ -107,7 +105,6 @@ export async function fetchOverallStatistics(): Promise<OverallStatistics> {
       .single() as any;
 
     if (error) {
-      console.error('Error fetching overall statistics:', error);
       throw error;
     }
 
@@ -117,7 +114,6 @@ export async function fetchOverallStatistics(): Promise<OverallStatistics> {
       totalCleanedAreas: data?.total_cleaned_areas || 0,
     };
   } catch (error) {
-    console.error('Error fetching overall statistics:', error);
     return {
       totalCampaignsCompleted: 0,
       totalParticipants: 0,
@@ -146,14 +142,12 @@ export async function fetchTopCities(): Promise<CityStatistic[]> {
     ]) as any;
 
     if (error) {
-      console.error('Error fetching city statistics:', error);
       // Return empty array on error instead of throwing
       return [];
     }
 
     // If no data or empty, return empty array
     if (!data || (Array.isArray(data) && data.length === 0)) {
-      console.warn('No city statistics available yet');
       return [];
     }
 
@@ -182,7 +176,6 @@ export async function fetchTopCities(): Promise<CityStatistic[]> {
 
     return sortedCities;
   } catch (error) {
-    console.error('Error fetching top cities:', error);
     // Return empty array on any error including timeout
     return [];
   }

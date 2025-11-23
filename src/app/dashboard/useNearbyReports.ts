@@ -51,8 +51,6 @@ export function useNearbyReports(radiusKm: number = 10) {
       if (controller.signal.aborted) {
         return;
       }
-      
-      console.error('Error fetching reports:', err);
       setError('Terjadi kesalahan saat memuat data');
       setReports([]);
     } finally {

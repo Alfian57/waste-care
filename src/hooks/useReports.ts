@@ -67,7 +67,6 @@ export function useReports() {
 
       setReports(markers);
     } catch (err) {
-      console.error('Error fetching reports:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch reports');
     } finally {
       setLoading(false);

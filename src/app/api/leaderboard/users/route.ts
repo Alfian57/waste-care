@@ -23,24 +23,23 @@ export async function POST(request: Request) {
     const { data, error } = await supabaseAdmin.auth.admin.listUsers();
 
     if (error) {
-      console.error('Error fetching users:', error);
       return NextResponse.json(
         { error: 'Failed to fetch users' },
         { status: 500 }
       );
     }
 
-    // Filter only requested users and return id + email
+    // Filter only requested users and return id + email + full_name
     const users = data.users
       .filter(user => userIds.includes(user.id))
       .map(user => ({
         id: user.id,
         email: user.email || '',
+        fullName: user.user_metadata?.full_name || '',
       }));
 
     return NextResponse.json({ users });
   } catch (error) {
-    console.error('API Error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

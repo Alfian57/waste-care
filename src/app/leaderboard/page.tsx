@@ -27,7 +27,6 @@ export default function LeaderboardPage() {
         setUserRank(rank);
       }
     } catch (err) {
-      console.error('Error loading leaderboard:', err);
       setError('Gagal memuat leaderboard');
     } finally {
       setLoading(false);

@@ -30,7 +30,6 @@ export function useCampaigns(filters?: CampaignFilters) {
 
       // Cancel request sebelumnya jika ada
       if (abortControllerRef.current) {
-        console.log('[CAMPAIGNS] Aborting previous request');
         abortControllerRef.current.abort();
       }
 
@@ -42,25 +41,19 @@ export function useCampaigns(filters?: CampaignFilters) {
       const cacheKey = `campaigns_${user?.id || 'guest'}_${filters?.status || 'all'}`;
       const cached = campaignsCache.get(cacheKey);
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        console.log('[CAMPAIGNS] Using cached data');
         setCampaigns(cached.data);
         setLoading(false);
         abortControllerRef.current = null;
         return;
       }
-
-      console.log('[CAMPAIGNS] Fetching from API...');
       // Fetch dari Supabase
       const data = await fetchCampaigns(user?.id);
       
       // Cek apakah request sudah di-cancel
       if (controller.signal.aborted) {
-        console.log('[CAMPAIGNS] Request was aborted after fetch');
         setLoading(false);
         return;
       }
-      
-      console.log('[CAMPAIGNS] Got data:', data.length, 'campaigns');
       
       // Apply filters
       let filtered = data;
@@ -74,30 +67,23 @@ export function useCampaigns(filters?: CampaignFilters) {
       setCampaigns(filtered);
       setLoading(false);
       abortControllerRef.current = null;
-      console.log('[CAMPAIGNS] Fetch complete');
-      console.log("[CAMPAIGNS] data:", filtered);
     } catch (err) {
       // Jangan set error jika request di-cancel
       if (abortControllerRef.current?.signal.aborted) {
-        console.log('[CAMPAIGNS] Error handling skipped (aborted)');
         setLoading(false); // IMPORTANT: Set loading false even on abort
         return;
       }
-      
-      console.error('[CAMPAIGNS] Error fetching campaigns:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch campaigns');
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    console.log('[CAMPAIGNS] useEffect triggered, hasFetched:', hasFetchedRef.current);
     
     fetchCampaignsData();
     
     // Cleanup: cancel request on unmount
     return () => {
-      console.log('[CAMPAIGNS] Cleanup - aborting request');
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
@@ -127,7 +113,6 @@ export function useCampaigns(filters?: CampaignFilters) {
         return null;
       }
     } catch (err) {
-      console.error('Error generating campaign:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate campaign');
       return null;
     } finally {
@@ -160,7 +145,6 @@ export function useCampaigns(filters?: CampaignFilters) {
       // Invalidate cache after join
       campaignsCache.clear();
     } catch (err) {
-      console.error('Error joining campaign:', err);
       setError(err instanceof Error ? err.message : 'Gagal bergabung dengan campaign');
       throw err;
     }
@@ -191,7 +175,6 @@ export function useCampaigns(filters?: CampaignFilters) {
       // Invalidate cache after leave
       campaignsCache.clear();
     } catch (err) {
-      console.error('Error leaving campaign:', err);
       setError(err instanceof Error ? err.message : 'Gagal keluar dari campaign');
       throw err;
     }

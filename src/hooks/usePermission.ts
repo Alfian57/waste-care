@@ -34,7 +34,6 @@ export function usePermission(
         options.onPermissionChange?.(newState);
       };
     } catch (error) {
-      console.warn('Permission check not supported:', error);
       setPermissionState('unsupported');
     } finally {
       setIsChecking(false);

@@ -50,7 +50,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
           ]) as any;
           
           if (error) {
-            console.error('[AUTH] Session error:', error);
             throw error;
           }
           
@@ -61,7 +60,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // Lazy load expService only when needed
             import('@/lib/expService').then(({ ensureProfileExists }) => {
               ensureProfileExists(session.user.id).catch(err => {
-                console.error('[AUTH] Profile creation failed:', err);
               });
             });
           }
@@ -78,12 +76,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // Success - break retry loop
           break;
         } catch (error) {
-          console.error(`[AUTH] Error getting session (${retries} retries left):`, error);
           retries--;
           
           if (retries === 0) {
             // All retries failed
-            console.error('[AUTH] Failed to get session after retries');
             setUser(null);
             
             // Redirect to login if not on public route

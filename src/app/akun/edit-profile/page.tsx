@@ -63,7 +63,6 @@ export default function EditProfilePage() {
         });
 
         if (updateError) {
-          console.error('Name update error:', updateError);
           throw updateError;
         }
         hasChanges = true;
@@ -103,7 +102,6 @@ export default function EditProfilePage() {
 
           if (!response.ok) {
             const errorData = await response.json();
-            console.error('Password update error:', errorData);
             
             if (response.status === 422) {
               setToast({
@@ -122,7 +120,6 @@ export default function EditProfilePage() {
         } catch (err: any) {
           clearTimeout(timeoutId);
           if (err.name === 'AbortError') {
-            console.error('Password update timed out');
             throw new Error('Request timeout. Silakan coba lagi.');
           }
           throw err;
@@ -159,7 +156,6 @@ export default function EditProfilePage() {
         router.push('/akun');
       }, 1500);
     } catch (error) {
-      console.error('Error updating profile:', error);
       setLoading(false);
       const errorMessage = getErrorMessage(error);
       setToast({

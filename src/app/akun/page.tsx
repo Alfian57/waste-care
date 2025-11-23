@@ -27,7 +27,6 @@ export default function AkunPage() {
           const exp = await getUserExp(user.id);
           setUserExp(exp);
         } catch (error) {
-          console.error('Error fetching user exp:', error);
         } finally {
           setLoadingExp(false);
         }
@@ -46,7 +45,6 @@ export default function AkunPage() {
       const { error } = await logout();
       
       if (error) {
-        console.error('Logout error:', error);
         alert('Gagal logout. Silakan coba lagi.');
         setLoggingOut(false);
         return;
@@ -54,7 +52,6 @@ export default function AkunPage() {
 
       // Redirect handled by AuthProvider
     } catch (error) {
-      console.error('Logout error:', error);
       alert('Gagal logout. Silakan coba lagi.');
       setLoggingOut(false);
     }

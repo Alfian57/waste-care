@@ -100,7 +100,6 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `
           window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
-              console.log('Page restored from bfcache');
               // Refresh dynamic content if needed
               if (window.location.pathname.includes('/dashboard') || 
                   window.location.pathname.includes('/campaign') ||

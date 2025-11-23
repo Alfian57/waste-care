@@ -52,7 +52,6 @@ export function usePhotoManagement({
       
       input.click();
     } catch (error) {
-      console.error('Error adding photo:', error);
       onSetToast({
         message: 'Gagal menambahkan foto',
         type: 'error'

@@ -72,7 +72,6 @@ function StatisticsSection() {
       setOverallStats(stats);
       setWasteStats(waste);
     } catch (err) {
-      console.error('Error loading statistics:', err);
       setError('Gagal memuat statistik. Silakan refresh halaman.');
     } finally {
       setLoading(false);

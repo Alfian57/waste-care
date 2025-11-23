@@ -49,9 +49,10 @@ export const leaderboardService = {
       if (profilesError) throw profilesError;
       if (!profiles) return [];
 
-      // Get emails for all users via API route
+      // Get emails and names for all users via API route
       const userIds = profiles.map(p => p.id);
       const emailMap = new Map<string, string>();
+      const nameMap = new Map<string, string>();
 
       try {
         const response = await fetch('/api/leaderboard/users', {
@@ -60,16 +61,24 @@ export const leaderboardService = {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ userIds }),
+          cache: 'no-store',
         });
 
         if (response.ok) {
           const { users } = await response.json();
-          users.forEach((user: { id: string; email: string }) => {
-            emailMap.set(user.id, user.email);
-          });
+          if (Array.isArray(users)) {
+            users.forEach((user: { id: string; email: string; fullName?: string }) => {
+              if (user.email) {
+                emailMap.set(user.id, user.email);
+              }
+              if (user.fullName) {
+                nameMap.set(user.id, user.fullName);
+              }
+            });
+          }
+        } else {
         }
       } catch (error) {
-        console.warn('Failed to fetch user emails, using fallback:', error);
       }
 
       // Map to leaderboard entries with proper ranking (handles ties)
@@ -82,8 +91,9 @@ export const leaderboardService = {
         // This ensures no duplicate ranks even with same EXP
         const currentRank = i + 1;
         
+        const fullName = nameMap.get(profile.id);
         const email = emailMap.get(profile.id);
-        const displayName = email ? censorEmail(email) : `User ${profile.id.slice(0, 8)}`;
+        const displayName = fullName || (email ? censorEmail(email) : `User ${profile.id.slice(0, 8)}`);
         
         leaderboard.push({
           id: profile.id,
@@ -96,7 +106,6 @@ export const leaderboardService = {
 
       return leaderboard;
     } catch (error) {
-      console.error('Error fetching leaderboard:', error);
       throw error;
     }
   },
@@ -150,7 +159,6 @@ export const leaderboardService = {
         total: totalCount || 0
       };
     } catch (error) {
-      console.error('Error fetching user rank:', error);
       throw error;
     }
   }

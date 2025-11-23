@@ -31,7 +31,6 @@ export function usePhotoNavigation() {
       
       input.click();
     } catch (error) {
-      console.error('Error taking photo:', error);
       setLoading(false);
     }
   };
