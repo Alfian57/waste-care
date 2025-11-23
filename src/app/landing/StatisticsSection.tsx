@@ -219,12 +219,12 @@ export default function StatisticsSection() {
                         <div className="mb-3">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm text-gray-600 truncate">Skor Kebersihan</span>
-                            <span className="text-sm font-semibold text-emerald-600 ml-2 flex-shrink-0">{city.completedCampaigns / city.activeReports * 100}%</span>
+                            <span className="text-sm font-semibold text-emerald-600 ml-2 flex-shrink-0">{city.score.toFixed(2)}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
                               className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
-                              style={{ width: `${city.completedCampaigns / city.activeReports * 100}%` }}
+                              style={{ width: `${Math.min(city.score, 100)}%` }}
                             />
                           </div>
                         </div>

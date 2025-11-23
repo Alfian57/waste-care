@@ -25,6 +25,46 @@ export interface WasteTypeStatistics {
 }
 
 /**
+ * Calculate cleanliness score based on the new algorithm
+ * Formula: Score = ((A × 5) + (C × 1)) / TargetMax × E × 100
+ * Where:
+ * - A = Area Dibersihkan (cleanedAreas)
+ * - C = Jumlah Campaign (completedCampaigns)
+ * - L = Laporan Aktif (activeReports)
+ * - E = Efektivitas = A / (A + L)
+ * - TargetMax = 500 (konstanta untuk normalisasi ke persentase)
+ */
+
+export function calculateCleanlinessScore(
+  cleanedAreas: number,
+  completedCampaigns: number,
+  activeReports: number
+): number {
+  const A = cleanedAreas;
+  const C = completedCampaigns;
+  const L = activeReports;
+  
+  // Efektivitas Penyelesaian (E): rasio area yang sudah dibersihkan
+  const E = (A + L) > 0 ? A / (A + L) : 0;
+  
+  // Skor Basis: (A × 5) + (C × 1)
+  const skorBasis = (A * 5) + (C * 1);
+  
+  // Target Max untuk normalisasi (500 = 100%)
+  const TargetMax = 500;
+  
+  // Skor Akhir: (SkorBasis / TargetMax) × E × 100
+  let score = (skorBasis / TargetMax) * E * 100;
+  
+  // Cap maksimal ke 100%
+  if (score > 100) {
+    score = 100;
+  }
+  
+  return score;
+}
+
+/**
  * Fetch waste type statistics from the database
  */
 export async function fetchWasteTypeStatistics(): Promise<WasteTypeStatistics> {
@@ -117,16 +157,30 @@ export async function fetchTopCities(): Promise<CityStatistic[]> {
       return [];
     }
 
-    // Map the database response to our interface
-    return data.map((city: any) => ({
-      rank: Number(city.rank),
+    // Map and recalculate scores using the new algorithm
+    const citiesWithNewScore = data.map((city: any) => ({
       city: city.city,
       province: city.province,
-      score: Number(city.score),
       completedCampaigns: Number(city.completed_campaigns),
       activeReports: Number(city.active_reports),
       cleanedAreas: Number(city.cleaned_areas),
+      score: calculateCleanlinessScore(
+        Number(city.cleaned_areas),
+        Number(city.completed_campaigns),
+        Number(city.active_reports)
+      ),
     }));
+
+    // Sort by new score (descending) and assign ranks
+    const sortedCities = citiesWithNewScore
+      .sort((a: any, b: any) => b.score - a.score)
+      .slice(0, 5) // Top 5 only
+      .map((city: any, index: number) => ({
+        ...city,
+        rank: index + 1,
+      }));
+
+    return sortedCities;
   } catch (error) {
     console.error('Error fetching top cities:', error);
     // Return empty array on any error including timeout
