@@ -75,6 +75,7 @@ export function useCampaigns(filters?: CampaignFilters) {
       setLoading(false);
       abortControllerRef.current = null;
       console.log('[CAMPAIGNS] Fetch complete');
+      console.log("[CAMPAIGNS] data:", filtered);
     } catch (err) {
       // Jangan set error jika request di-cancel
       if (abortControllerRef.current?.signal.aborted) {
