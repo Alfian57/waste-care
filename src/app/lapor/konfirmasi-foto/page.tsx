@@ -68,7 +68,7 @@ export default function KonfirmasiFotoPage() {
       {/* Content */}
       <div className="flex-1 px-6 py-8">
         <div className="space-y-6">
-          <h1 className="text-2xl font-bold text-gray-900 font-['CircularStd'] text-center">
+          <h1 className="text-2xl font-bold text-gray-900 text-center">
             Konfirmasi foto sampah
           </h1>
 

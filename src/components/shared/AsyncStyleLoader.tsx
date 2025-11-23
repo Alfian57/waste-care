@@ -40,9 +40,6 @@ export function AsyncStyleLoader() {
       'https://cdn.jsdelivr.net/npm/@maptiler/sdk@latest/dist/maptiler-sdk.css',
       'maptiler-css'
     );
-    
-    // Load map-specific styles
-    loadStyle('/map-styles.css', 'map-styles');
   }, [pathname]);
 
   return null;

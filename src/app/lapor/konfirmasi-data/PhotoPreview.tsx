@@ -6,7 +6,7 @@ export default function PhotoPreview({ photos }: PhotoPreviewProps) {
   return (
     <div className="bg-gray-50 rounded-xl p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-medium text-gray-700 font-['CircularStd']">
+        <span className="text-sm font-medium text-gray-700">
           {photos.length} Foto diunggah
         </span>
         <div className="flex -space-x-2">

@@ -87,23 +87,12 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link rel="dns-prefetch" href="https://api.maptiler.com" />
         
-        {/* Preload critical font with font-display: swap */}
-        <link 
-          rel="preload" 
-          href="https://cdn.jsdelivr.net/npm/@vetixy/circular-std@1.0.0/dist/CircularStd-Book.woff2" 
-          as="font" 
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        
-        {/* Inline critical font CSS to avoid render blocking */}
+        {/* Use system fonts with similar characteristics to CircularStd */}
         <style dangerouslySetInnerHTML={{ __html: `
-          @font-face {
-            font-family: 'CircularStd';
-            src: url('https://cdn.jsdelivr.net/npm/@vetixy/circular-std@1.0.0/dist/CircularStd-Book.woff2') format('woff2');
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
           }
         `}} />
         

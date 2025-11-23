@@ -69,7 +69,7 @@ export default function Toast({ message, type = 'info', onClose, duration = 5000
           {getIcon()}
         </div>
         <div className="flex-1 pt-0.5">
-          <p className="text-sm font-medium text-gray-900 font-['CircularStd']">
+          <p className="text-sm font-medium text-gray-900">
             {message}
           </p>
         </div>

@@ -28,7 +28,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
     text-gray-900 placeholder-gray-400
     focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
     transition-colors duration-200
-    font-['CircularStd']
+   
     text-base
     min-h-[48px]
   `;
@@ -42,7 +42,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
   return (
     <div className={`${fullWidth ? 'w-full' : ''} space-y-1`}>
       {label && (
-        <label className="block text-sm font-medium text-gray-900 mb-1 font-['CircularStd']">
+        <label className="block text-sm font-medium text-gray-900 mb-1">
           {label}
         </label>
       )}
@@ -82,7 +82,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
       </div>
       
       {error && (
-        <p className="text-sm text-red-500 mt-1 font-['CircularStd']">
+        <p className="text-sm text-red-500 mt-1">
           {error}
         </p>
       )}

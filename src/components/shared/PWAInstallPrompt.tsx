@@ -70,10 +70,10 @@ export const PWAInstallPrompt: React.FC = () => {
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-semibold text-gray-900 font-['CircularStd']">
+          <h4 className="text-sm font-semibold text-gray-900">
             Install WasteCare
           </h4>
-          <p className="text-sm text-gray-600 font-['CircularStd'] mt-1">
+          <p className="text-sm text-gray-600 mt-1">
             Install aplikasi untuk akses yang lebih cepat dan pengalaman yang lebih baik
           </p>
           <div className="flex space-x-2 mt-3">

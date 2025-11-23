@@ -176,10 +176,10 @@ export default function CreateCampaignForm() {
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 font-['CircularStd']">
+              <h1 className="text-xl font-bold text-gray-900">
                 Buat Campaign
               </h1>
-              <p className="text-sm text-gray-500 font-['CircularStd']">
+              <p className="text-sm text-gray-500">
                 Ajak orang untuk bergotong royong
               </p>
             </div>
@@ -221,10 +221,10 @@ export default function CreateCampaignForm() {
               </svg>
             </div>
             <div className="flex-1">
-              <h2 className="text-base font-bold text-blue-600 font-['CircularStd'] mb-1">
+              <h2 className="text-base font-bold text-blue-600 mb-1">
                 Lokasi Campaign
               </h2>
-              <p className="text-sm text-blue-600 font-['CircularStd']">
+              <p className="text-sm text-blue-600">
                 Lainnya
               </p>
             </div>
@@ -233,13 +233,13 @@ export default function CreateCampaignForm() {
 
         {/* Detail Campaign Section */}
         <div className="bg-white rounded-2xl p-5 shadow-sm space-y-4">
-          <h2 className="text-lg font-bold text-gray-900 font-['CircularStd']">
+          <h2 className="text-lg font-bold text-gray-900">
             Detail Campaign
           </h2>
 
           {/* Judul Campaign */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 font-['CircularStd']">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Judul Campaign <span className="text-red-500">*</span>
             </label>
             <Input
@@ -254,7 +254,7 @@ export default function CreateCampaignForm() {
           {/* Tanggal dan Waktu */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 font-['CircularStd']">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Tanggal <span className="text-red-500">*</span>
               </label>
               <Input
@@ -267,7 +267,7 @@ export default function CreateCampaignForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 font-['CircularStd']">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Waktu <span className="text-red-500">*</span>
               </label>
               <Input
@@ -282,7 +282,7 @@ export default function CreateCampaignForm() {
 
           {/* Maksimal Partisipan */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 font-['CircularStd']">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Maksimal Partisipan <span className="text-red-500">*</span>
             </label>
             <Input
@@ -293,14 +293,14 @@ export default function CreateCampaignForm() {
               min={2}
               required
             />
-            <p className="text-xs text-gray-500 mt-1 font-['CircularStd']">
+            <p className="text-xs text-gray-500 mt-1">
               Minimal 2 orang partisipan
             </p>
           </div>
 
           {/* Deskripsi */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 font-['CircularStd']">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Deskripsi (Opsional)
             </label>
             <textarea
@@ -309,20 +309,20 @@ export default function CreateCampaignForm() {
               onChange={handleInputChange}
               placeholder="Tambahkan informasi tambahan tentang campaign..."
               rows={4}
-              className="w-full px-4 py-3 text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-['CircularStd'] text-sm resize-none"
+              className="w-full px-4 py-3 text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm resize-none"
             />
           </div>
         </div>
 
         {/* Penyelenggara Section */}
         <div className="bg-white rounded-2xl p-5 shadow-sm space-y-4">
-          <h2 className="text-lg font-bold text-gray-900 font-['CircularStd']">
+          <h2 className="text-lg font-bold text-gray-900">
             Penyelenggara
           </h2>
 
           {/* Tipe Penyelenggara */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3 font-['CircularStd']">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
               Tipe Penyelenggara <span className="text-red-500">*</span>
             </label>
             <div className="space-y-3">
@@ -368,7 +368,7 @@ export default function CreateCampaignForm() {
                         />
                       </svg>
                       <span
-                        className={`font-semibold font-['CircularStd'] ${
+                        className={`font-semibold ${
                           formData.organizerType === 'personal'
                             ? 'text-emerald-700'
                             : 'text-gray-700'
@@ -377,7 +377,7 @@ export default function CreateCampaignForm() {
                         Pribadi
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 font-['CircularStd']">
+                    <p className="text-sm text-gray-600">
                       Campaign atas nama pribadi
                     </p>
                   </div>
@@ -426,7 +426,7 @@ export default function CreateCampaignForm() {
                         />
                       </svg>
                       <span
-                        className={`font-semibold font-['CircularStd'] ${
+                        className={`font-semibold ${
                           formData.organizerType === 'organization'
                             ? 'text-emerald-700'
                             : 'text-gray-700'
@@ -435,7 +435,7 @@ export default function CreateCampaignForm() {
                         Yayasan/Organisasi
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 font-['CircularStd']">
+                    <p className="text-sm text-gray-600">
                       Campaign atas nama yayasan atau organisasi
                     </p>
                   </div>
@@ -446,7 +446,7 @@ export default function CreateCampaignForm() {
 
           {/* Nama Penyelenggara */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 font-['CircularStd']">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Nama Penyelenggara <span className="text-red-500">*</span>
             </label>
             <Input

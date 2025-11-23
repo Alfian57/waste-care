@@ -62,7 +62,7 @@ export default function LoginForm({
         />
         <Link 
           href="/forgot-password" 
-          className="text-sm text-[#16a34a] hover:text-[#15803d] font-medium font-['CircularStd']"
+          className="text-sm text-[#16a34a] hover:text-[#15803d] font-medium"
         >
           Lupa password?
         </Link>

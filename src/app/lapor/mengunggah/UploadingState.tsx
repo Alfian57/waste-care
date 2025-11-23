@@ -6,7 +6,7 @@ interface UploadingStateProps {
 export default function UploadingState({ uploading, progress }: UploadingStateProps) {
   return (
     <div className="text-center space-y-8">
-      <h1 className="text-2xl font-bold text-gray-900 font-['CircularStd']">
+      <h1 className="text-2xl font-bold text-gray-900">
         {uploading ? 'Mulai mengunggah...' : 'Berhasil diunggah!'}
       </h1>
 
@@ -40,7 +40,7 @@ export default function UploadingState({ uploading, progress }: UploadingStatePr
               style={{ width: `${progress}%` }}
             ></div>
           </div>
-          <p className="text-sm text-gray-600 font-['CircularStd']">
+          <p className="text-sm text-gray-600">
             {progress}% selesai
           </p>
         </div>

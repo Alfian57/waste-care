@@ -27,7 +27,7 @@ export default function PhotoStepHeader({ onBack }: PhotoStepHeaderProps) {
       
       {/* Step Info */}
       <div className="mt-3">
-        <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 2/4</p>
+        <p className="text-sm text-orange-500 font-medium">LANGKAH 2/4</p>
       </div>
     </div>
   );
