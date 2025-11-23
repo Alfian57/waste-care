@@ -63,15 +63,38 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
     const originalFetch = window.fetch;
     window.fetch = function(...args: any[]) {
       const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
-      // Block logo.svg and other branding resources that set cookies
-      if (url.includes('logo.svg') || url.includes('maptiler.com/resources')) {
-        return Promise.reject(new Error('Blocked third-party cookie request'));
+      // Block logo.svg and other branding/tracking resources that set cookies
+      if (
+        url.includes('logo.svg') || 
+        url.includes('/resources/logo') ||
+        url.includes('maptiler.com/resources') ||
+        url.includes('api.maptiler.com/resources')
+      ) {
+        // Return empty response instead of rejecting to prevent console errors
+        return Promise.resolve(new Response('', { status: 204 }));
       }
       return originalFetch.apply(this, args as [RequestInfo | URL, RequestInit?]);
     };
     
+    // Also intercept XMLHttpRequest for older APIs
+    const originalXHROpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method: string, url: string | URL, ...rest: any[]) {
+      const urlStr = url.toString();
+      if (
+        urlStr.includes('logo.svg') || 
+        urlStr.includes('/resources/logo') ||
+        urlStr.includes('maptiler.com/resources') ||
+        urlStr.includes('api.maptiler.com/resources')
+      ) {
+        // Block the request
+        return;
+      }
+      return originalXHROpen.apply(this, [method, url, ...rest] as any);
+    };
+    
     return () => {
       window.fetch = originalFetch;
+      XMLHttpRequest.prototype.open = originalXHROpen;
     };
   }, []);
 

@@ -20,8 +20,8 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
   },
   
-  // Optimize production builds
-  productionBrowserSourceMaps: false,
+  // Enable production source maps for debugging (external, not inline)
+  productionBrowserSourceMaps: true,
   
   // Suppress source map warnings in development
   devIndicators: {

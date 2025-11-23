@@ -43,6 +43,7 @@ export default function Footer() {
               </a>
               <a
                 href="#"
+                aria-label="Twitter"
                 className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -51,6 +52,7 @@ export default function Footer() {
               </a>
               <a
                 href="#"
+                aria-label="Instagram"
                 className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -117,18 +119,15 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-emerald-400 transition-colors text-sm">
-                  Campaign
+                <a href="#" aria-label="Campaign" className="hover:text-emerald-400 transition-colors text-sm">
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-emerald-400 transition-colors text-sm">
-                  Revalidasi
+                <a href="#" aria-label="Revalidasi" className="hover:text-emerald-400 transition-colors text-sm">
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-emerald-400 transition-colors text-sm">
-                  Dashboard
+                <a href="#" aria-label="Dashboard" className="hover:text-emerald-400 transition-colors text-sm">
                 </a>
               </li>
             </ul>
@@ -168,14 +167,11 @@ export default function Footer() {
               © {new Date().getFullYear()} WasteCare. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-sm text-gray-400 hover:text-emerald-400 transition-colors">
-                Kebijakan Privasi
+              <a href="#" aria-label="Kebijakan Privasi" className="text-sm text-gray-400 hover:text-emerald-400 transition-colors">
               </a>
-              <a href="#" className="text-sm text-gray-400 hover:text-emerald-400 transition-colors">
-                Syarat & Ketentuan
+              <a href="#" aria-label="Syarat & Ketentuan" className="text-sm text-gray-400 hover:text-emerald-400 transition-colors">
               </a>
-              <a href="#" className="text-sm text-gray-400 hover:text-emerald-400 transition-colors">
-                Bantuan
+              <a href="#" aria-label="Bantuan" className="text-sm text-gray-400 hover:text-emerald-400 transition-colors">
               </a>
             </div>
           </div>

@@ -55,8 +55,8 @@ export default function HeroSection() {
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-white opacity-20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-white opacity-20 rounded-full blur-3xl"></div>
       </div>
 
       <div className="container mx-auto px-6 py-20 relative z-10">
@@ -111,7 +111,7 @@ export default function HeroSection() {
                     {wasteStats.total.toLocaleString('id-ID')}
                   </div>
                 )}
-                <div className="text-emerald-100 text-sm">Laporan Aktif</div>
+                <div className="text-emerald-200 text-sm font-medium">Laporan Aktif</div>
               </div>
               <div>
                 {loading ? (
@@ -123,7 +123,7 @@ export default function HeroSection() {
                     {overallStats.totalCampaignsCompleted.toLocaleString('id-ID')}
                   </div>
                 )}
-                <div className="text-emerald-100 text-sm">Jumlah Campaign</div>
+                <div className="text-emerald-200 text-sm font-medium">Jumlah Campaign</div>
               </div>
               <div>
                 {loading ? (
@@ -138,7 +138,7 @@ export default function HeroSection() {
                     }
                   </div>
                 )}
-                <div className="text-emerald-100 text-sm">Pengguna Aktif</div>
+                <div className="text-emerald-200 text-sm font-medium">Pengguna Aktif</div>
               </div>
             </div>
           </div>
