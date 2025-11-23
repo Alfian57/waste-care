@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "build:pwa": "next build",
-    "preview": "next build && next start"
+    "preview": "next build && next start",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@maptiler/sdk": "^3.8.0",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^16.0.3",
     "@tailwindcss/postcss": "^4",
     "@types/next-pwa": "^5.6.9",
     "@types/node": "^20",

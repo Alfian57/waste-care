@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components";
 import { ProtectedRoute } from "@/components";
-import { ReportProvider } from "@/contexts/ReportContext";
-import { RevalidationProvider } from "@/contexts/RevalidationContext";
+import { ClientProviders } from "@/components/providers/ClientProviders";
+import { AsyncStyleLoader } from "@/components/shared/AsyncStyleLoader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -80,14 +80,49 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to external domains for faster loading */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://api.maptiler.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        <link rel="dns-prefetch" href="https://api.maptiler.com" />
+        
+        {/* Use system fonts with similar characteristics to CircularStd */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+        `}} />
+        
+        {/* Back/Forward Cache restoration support */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+              console.log('Page restored from bfcache');
+              // Refresh dynamic content if needed
+              if (window.location.pathname.includes('/dashboard') || 
+                  window.location.pathname.includes('/campaign') ||
+                  window.location.pathname.includes('/leaderboard')) {
+                window.location.reload();
+              }
+            }
+          });
+          
+          // Mark page as bfcache-eligible
+          window.addEventListener('pagehide', function(event) {
+            // Allow bfcache by not having any blocking operations
+          });
+        `}} />
+      </head>
       <body className="antialiased" suppressHydrationWarning>
+        <AsyncStyleLoader />
         <AuthProvider>
           <ProtectedRoute>
-            <ReportProvider>
-              <RevalidationProvider>
-                {children}
-              </RevalidationProvider>
-            </ReportProvider>
+            <ClientProviders>
+              {children}
+            </ClientProviders>
           </ProtectedRoute>
         </AuthProvider>
       </body>

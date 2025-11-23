@@ -131,9 +131,9 @@ export async function fetchOverallStatistics(): Promise<OverallStatistics> {
  */
 export async function fetchTopCities(): Promise<CityStatistic[]> {
   try {
-    // Add timeout to prevent long-running queries
+    // Add timeout to prevent long-running queries (reduced to 8s)
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
+      setTimeout(() => reject(new Error('Request timeout')), 8000);
     });
 
     const fetchPromise = supabase

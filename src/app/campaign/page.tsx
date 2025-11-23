@@ -1,12 +1,31 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { BottomNavigation } from '@/components';
-import { CampaignDetailModal } from './CampaignDetailModal';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import type { Campaign } from '@/types/campaign.types';
-import { CampaignCard } from './CampaignCard';
 import { useSearchParams } from 'next/navigation';
+
+// Lazy load heavy components
+const CampaignDetailModal = dynamic(
+  () => import('./CampaignDetailModal').then(mod => ({ default: mod.CampaignDetailModal })),
+  { ssr: false }
+);
+
+const CampaignCard = dynamic(
+  () => import('./CampaignCard').then(mod => ({ default: mod.CampaignCard })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-white rounded-2xl p-6 shadow-sm animate-pulse">
+        <div className="h-48 bg-gray-200 rounded-xl mb-4"></div>
+        <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded w-full"></div>
+      </div>
+    ),
+  }
+);
 
 export default function CampaignPage() {
   const searchParams = useSearchParams();

@@ -46,15 +46,15 @@ export const DetailItem: React.FC<DetailItemProps> = ({
       
       {/* Content - Flex 1 */}
       <div className="flex-1 min-w-0 text-left">
-        <p className="text-sm font-medium text-gray-900 font-['CircularStd']">{title}</p>
-        <p className="text-sm text-gray-600 font-['CircularStd']">{description}</p>
+        <p className="text-sm font-medium text-gray-900">{title}</p>
+        <p className="text-sm text-gray-600">{description}</p>
       </div>
       
       {/* Action Button - Center aligned */}
       {onActionClick && actionText && (
         <button
           onClick={onActionClick}
-          className="flex-shrink-0 self-center px-2 py-1.5 text-sm font-medium text-black font-['CircularStd'] transition-colors border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+          className="flex-shrink-0 self-center px-2 py-1.5 text-sm font-medium text-black transition-colors border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
         >
           {actionText}
         </button>

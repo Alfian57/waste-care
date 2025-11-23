@@ -9,10 +9,10 @@ export default function SuccessMessage() {
         </div>
       </div>
       
-      <h1 className="text-2xl font-bold text-gray-900 font-['CircularStd']">
+      <h1 className="text-2xl font-bold text-gray-900">
         Laporan berhasil dikirim!
       </h1>
-      <p className="text-gray-600 font-['CircularStd']">
+      <p className="text-gray-600">
         Terima kasih telah berkontribusi menjaga lingkungan. AI kami telah menganalisis foto dan mengklasifikasikan sampah secara otomatis.
       </p>
     </div>

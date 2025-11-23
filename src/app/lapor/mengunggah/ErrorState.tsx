@@ -16,10 +16,10 @@ export default function ErrorState({ error, onRetry, onBack }: ErrorStateProps) 
       </div>
       
       <div className="space-y-3">
-        <h1 className="text-2xl font-bold text-gray-900 font-['CircularStd']">
+        <h1 className="text-2xl font-bold text-gray-900">
           Gagal mengunggah
         </h1>
-        <p className="text-gray-600 font-['CircularStd']">
+        <p className="text-gray-600">
           {error}
         </p>
       </div>

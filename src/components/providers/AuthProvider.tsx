@@ -2,10 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { User } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { ensureProfileExists, clearProfileCache } from '@/lib/expService';
-import { clearCampaignsCache } from '@/hooks/useCampaigns';
 
 interface AuthContextType {
   user: User | null;
@@ -43,7 +41,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // Add timeout for session retrieval
           const sessionPromise = supabase.auth.getSession();
           const timeoutPromise = new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Session timeout')), 5000)
+            setTimeout(() => reject(new Error('Session timeout')), 3000) // Reduced from 5s to 3s
           );
           
           const { data: { session }, error } = await Promise.race([
@@ -58,14 +56,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           setUser(session?.user ?? null);
           
-          // Ensure profile exists when user is authenticated
+          // Ensure profile exists when user is authenticated (lazy load service)
           if (session?.user) {
-            try {
-              await ensureProfileExists(session.user.id);
-            } catch (profileError) {
-              console.error('[AUTH] Profile creation failed:', profileError);
-              // Don't block auth flow if profile creation fails
-            }
+            // Lazy load expService only when needed
+            import('@/lib/expService').then(({ ensureProfileExists }) => {
+              ensureProfileExists(session.user.id).catch(err => {
+                console.error('[AUTH] Profile creation failed:', err);
+              });
+            });
           }
           
           // Redirect logic after getting session
@@ -110,16 +108,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Ensure profile exists when user signs in
+        // Lazy load services only when needed
         if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
-          await ensureProfileExists(session.user.id);
+          import('@/lib/expService').then(({ ensureProfileExists }) => {
+            ensureProfileExists(session.user.id);
+          });
         }
 
         // Handle auth state changes
         if (event === 'SIGNED_OUT') {
-          // Clear all caches on logout
-          clearProfileCache();
-          clearCampaignsCache();
+          // Clear all caches on logout (lazy load)
+          Promise.all([
+            import('@/lib/expService').then(m => m.clearProfileCache()),
+            import('@/hooks/useCampaigns').then(m => m.clearCampaignsCache())
+          ]);
           router.push('/login');
         } else if (event === 'SIGNED_IN' && isPublicRoute) {
           router.push('/dashboard');

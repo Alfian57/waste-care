@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { 
   fetchTopCities, 
   fetchOverallStatistics,
@@ -18,7 +18,7 @@ const statisticsCache: {
   waste?: { data: WasteTypeStatistics, timestamp: number }
 } = {};
 
-export default function StatisticsSection() {
+function StatisticsSection() {
   const [topCities, setTopCities] = useState<CityStatistic[]>([]);
   const [overallStats, setOverallStats] = useState<OverallStatistics>({
     totalCampaignsCompleted: 0,
@@ -425,3 +425,5 @@ export default function StatisticsSection() {
     </section>
   );
 }
+
+export default memo(StatisticsSection);

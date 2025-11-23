@@ -57,10 +57,10 @@ export default function ReportDetails({
       {/* Notes if exists */}
       {notes && (
         <div className="bg-gray-50 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-gray-700 font-['CircularStd'] mb-2">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">
             Catatan tambahan
           </h3>
-          <p className="text-sm text-gray-600 font-['CircularStd']">
+          <p className="text-sm text-gray-600">
             {notes}
           </p>
         </div>

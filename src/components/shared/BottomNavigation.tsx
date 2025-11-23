@@ -93,7 +93,7 @@ export const BottomNavigation: React.FC = () => {
               <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
                 {item.icon(isActive)}
               </div>
-              <span className={`text-[10px] sm:text-xs mt-1 font-['CircularStd'] truncate max-w-full ${
+              <span className={`text-[10px] sm:text-xs mt-1 truncate max-w-full ${
                 isActive ? 'text-emerald-500 font-medium' : 'text-slate-400'
               }`}>
                 {item.label}

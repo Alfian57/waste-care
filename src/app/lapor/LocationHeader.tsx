@@ -30,7 +30,7 @@ export default function LocationHeader({ onBack }: LocationHeaderProps) {
       
       {/* Step Info */}
       <div className="mt-3">
-        <p className="text-sm text-orange-500 font-medium font-['CircularStd']">LANGKAH 1/4</p>
+        <p className="text-sm text-orange-500 font-medium">LANGKAH 1/4</p>
       </div>
     </div>
   );

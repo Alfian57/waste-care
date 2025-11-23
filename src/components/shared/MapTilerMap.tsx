@@ -56,6 +56,24 @@ const MapTilerMapComponent: React.FC<MapTilerMapProps> = ({
   const [isOnline, setIsOnline] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [mapError, setMapError] = useState<string | null>(null);
+  
+  // Block third-party cookie requests from MapTiler
+  useEffect(() => {
+    // Prevent MapTiler from making cookie-setting requests
+    const originalFetch = window.fetch;
+    window.fetch = function(...args: any[]) {
+      const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+      // Block logo.svg and other branding resources that set cookies
+      if (url.includes('logo.svg') || url.includes('maptiler.com/resources')) {
+        return Promise.reject(new Error('Blocked third-party cookie request'));
+      }
+      return originalFetch.apply(this, args as [RequestInfo | URL, RequestInit?]);
+    };
+    
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
 
   // Keep callback refs updated
   useEffect(() => {

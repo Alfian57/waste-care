@@ -1,8 +1,18 @@
-import { MapTilerMap } from '@/components';
+import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
 import CloseButton from './CloseButton';
 import LocationPermissionButton from './LocationPermissionButton';
 import type { WasteMarker } from '.';
+
+// Lazy load MapTiler only for dashboard
+const MapTilerMap = dynamic(() => import('@/components/shared/LazyMapTilerMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+      <div className="animate-pulse text-gray-400">Memuat peta...</div>
+    </div>
+  ),
+});
 
 interface MapViewProps {
   userLocation: [number, number] | null;
